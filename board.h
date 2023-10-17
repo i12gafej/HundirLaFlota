@@ -8,8 +8,7 @@
 
 class Board{
     private:
-        /*TODO it is needed to do reserve the 10x10 matrix xdd*/
-        
+        //Size of the matrix is reserved in the constructor
         std::vector<std::vector<std::string>> board_;    //coordinates from one of the axis will be required to be translated
         int n_boats_;
         bool ready_;

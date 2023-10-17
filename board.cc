@@ -5,7 +5,9 @@
 #include <iostream>
 
 Board::Board(){
-    initialise_board();
+    std::vector<std::vector<std::string>> aux (10, std::vector<std::string>(10, "B"));      //init the board
+    
+    board_ = aux;
     n_boats_ = 4;   //or whatever the number is
     ready_ = false;
 }
