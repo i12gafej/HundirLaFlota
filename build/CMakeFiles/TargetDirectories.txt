@@ -1,4 +1,0 @@
-/home/daniel/Documentos/Redes/Prácticas/P2/Practica C++/build/CMakeFiles/server.dir
-/home/daniel/Documentos/Redes/Prácticas/P2/Practica C++/build/CMakeFiles/client.dir
-/home/daniel/Documentos/Redes/Prácticas/P2/Practica C++/build/CMakeFiles/edit_cache.dir
-/home/daniel/Documentos/Redes/Prácticas/P2/Practica C++/build/CMakeFiles/rebuild_cache.dir
