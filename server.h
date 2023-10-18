@@ -1,8 +1,24 @@
+#ifndef SERVER_H
+#define SERVER_H
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+#include<signal.h>
+#include <unistd.h>
+#include <time.h>
+#include <arpa/inet.h>
+
+#define MSG_SIZE 250
+#define MAX_CLIENTS 50
+
 //
 //
 
-#ifndef SERVER_H
-#define SERVER_H
 
 class Server{
     public:
@@ -11,5 +27,6 @@ class Server{
     bool close();
 
 };
+void manejador (int signum);
 
 #endif
