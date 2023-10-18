@@ -17,7 +17,6 @@ class Board{
     public:
         //Constructor
         Board();
-        Board();
 
         //Getters
         int get_nboats(){return n_boats_;}
