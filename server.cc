@@ -8,7 +8,8 @@
 bool Server::start(){
     int sd, new_sd;
 	struct sockaddr_in sockname, from;
-	char buffer[MSG_SIZE];
+	char cbuffer[MSG_SIZE];
+    std::string buffer;
 	socklen_t from_len;
     fd_set readfds, auxfds;
    	int salida;
@@ -107,22 +108,26 @@ bool Server::start(){
                                     numClientes++;
                                     FD_SET(new_sd,&readfds);
                                 
-                                    strcpy(buffer, "Bienvenido al chat\n");
-                                
-                                    send(new_sd,buffer,sizeof(buffer),0);
+                                    //strcpy(buffer, "Bienvenido al chat\n");
+                                    buffer = "Bienvenido al chat";
+                                    
+                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
                                 
                                     for(j=0; j<(numClientes-1);j++){
                                     
-                                        bzero(buffer,sizeof(buffer));
-                                        sprintf(buffer, "Nuevo Cliente conectado en <%d>",new_sd);
-                                        send(arrayClientes[j],buffer,sizeof(buffer),0);
+                                        //bzero(buffer,sizeof(buffer));
+                                        buffer = "";
+                                        //sprintf(buffer, "Nuevo Cliente conectado en <%d>",new_sd);
+                                        buffer = "Nuevo Cliente conectado en <" + std::to_string(new_sd) + ">";
+                                        send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
                                     }
                                 }
                                 else
                                 {
-                                    bzero(buffer,sizeof(buffer));
-                                    strcpy(buffer,"Demasiados clientes conectados\n");
-                                    send(new_sd,buffer,sizeof(buffer),0);
+                                    //bzero(buffer,sizeof(buffer));
+                                    buffer = "";
+                                    buffer = "Demasiados clientes conectados\n";
+                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
                                     close(new_sd);
                                 }
                                 
@@ -132,16 +137,21 @@ bool Server::start(){
                         }
                         else if (i == 0){
                             //Se ha introducido información de teclado
-                            bzero(buffer, sizeof(buffer));
-                            fgets(buffer, sizeof(buffer),stdin);
+                            bzero(cbuffer, sizeof(cbuffer));
+                            buffer = "";
+                            fgets(cbuffer, sizeof(cbuffer),stdin);
+                            buffer.assign(cbuffer);
+                            
                             
                             //Controlar si se ha introducido "SALIR", cerrando todos los sockets y finalmente saliendo del servidor. (implementar)
-                            if(strcmp(buffer,"SALIR\n") == 0){
+                            if(buffer == "SALIR\n"){
                              
                                 for (j = 0; j < numClientes; j++){
-						   bzero(buffer, sizeof(buffer));
-						   strcpy(buffer,"Desconexión servidor\n"); 
-                                    send(arrayClientes[j],buffer , sizeof(buffer),0);
+						            //bzero(buffer, sizeof(buffer));
+                                    buffer = "";
+						            //strcpy(buffer,"Desconexión servidor\n"); 
+                                    buffer = "Desconexión sevidor\n";
+                                    send(arrayClientes[j],buffer.c_str() , sizeof(buffer.c_str()),0);
                                     close(arrayClientes[j]);
                                     FD_CLR(arrayClientes[j],&readfds);
                                 }
@@ -154,29 +164,31 @@ bool Server::start(){
                             
                         } 
                         else{
-                            bzero(buffer,sizeof(buffer));
-                            
-                            recibidos = recv(i,buffer,sizeof(buffer),0);
+                            bzero(cbuffer,sizeof(cbuffer));
+                            buffer = "";
+                            recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
+                            buffer.assign(cbuffer);
                             
                             if(recibidos > 0){
                                 
-                                if(strcmp(buffer,"SALIR\n") == 0){
+                                if(buffer == "SALIR\n"){
                                     
-                                    salirCliente(i,&readfds,&numClientes,arrayClientes);
+                                    close_client(i,&readfds,&numClientes,arrayClientes);
                                     
                                 }
                                 else{
                                     
                                     sprintf(identificador,"<%d>: %s",i,buffer);
-                                    bzero(buffer,sizeof(buffer));
+                                    //bzero(buffer,sizeof(buffer));
+                                    buffer = "";
+                                    //strcpy(buffer,identificador);
+                                    buffer.assign(identificador);
 
-                                    strcpy(buffer,identificador);
-
-                                    printf("%s\n", buffer);
+                                    std::cout << buffer <<std::endl;
 
                                     for(j=0; j<numClientes; j++)
                                         if(arrayClientes[j] != i)
-                                            send(arrayClientes[j],buffer,sizeof(buffer),0);
+                                            send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
 
                                     
                                 }
@@ -188,7 +200,7 @@ bool Server::start(){
                             {
                                 printf("El socket %d, ha introducido ctrl+c\n", i);
                                 //Eliminar ese socket
-                                //salirCliente(i,&readfds,&numClientes,arrayClientes);
+                                close_client(i,&readfds,&numClientes,arrayClientes);
                             }
                         }
                     }
@@ -208,4 +220,30 @@ void manejador (int signum){
     signal(SIGINT,manejador);
     
     //Implementar lo que se desee realizar cuando ocurra la excepción de ctrl+c en el servidor
+}
+void Server::close_client(int socket, fd_set * readfds, int * numClientes, int arrayClientes[]){
+  
+    char buffer[250];
+    int j;
+    
+    close(socket);
+    FD_CLR(socket,readfds);
+    
+    //Re-estructurar el array de clientes
+    for (j = 0; j < (*numClientes) - 1; j++)
+        if (arrayClientes[j] == socket)
+            break;
+    for (; j < (*numClientes) - 1; j++)
+        (arrayClientes[j] = arrayClientes[j+1]);
+    
+    (*numClientes)--;
+    
+    bzero(buffer,sizeof(buffer));
+    sprintf(buffer,"Desconexión del cliente <%d>",socket);
+    
+    for(j=0; j<(*numClientes); j++)
+        if(arrayClientes[j] != socket)
+            send(arrayClientes[j],buffer,sizeof(buffer),0);
+
+
 }
