@@ -6,17 +6,18 @@
 
 #include <string>
 #include <vector>
-#include "board.h"
 
 class Client{
     private:
         int id_;
         std::string password_;
-        Board board_;
-        
-        std::vector<int> boats;
+        std::vector<std::vector<std::string>> board_;
+        bool waiting;
+
         /*Había pensado en algo así como tener un vector con los el tamaño de los barcos
-        y que cuando se vayan colocando se haga delete de esos tamaños*/
+        y que cuando se vayan colocando se haga delete de esos tamaños.
+        PD: Hay que mirar cuales son los barcos */
+        //std::vector<int> boats;
 
     public:
         //Constructor
@@ -25,7 +26,7 @@ class Client{
         //Getters
         int get_id(){return id_;}
         std::string get_password(){return password_;}
-        Board get_board(){return board_;}
+        std::vector<std::vector<std::string>> get_board(){return board_;}
 
         //Setters
         void set_id(int id){id_ = id;}
@@ -33,7 +34,12 @@ class Client{
 
         //Methods
         bool connect();
+        void print_board();
         bool set_board();
+        bool set_to_up(int size, int x, int y);
+        bool set_to_right(int size, int x, int y);
+        bool set_to_down(int size, int x, int y);
+        bool set_to_left(int size, int x, int y);
 
 };
 
