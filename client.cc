@@ -19,6 +19,24 @@ bool Client::connect(){
     return true;        //placeholder
 }
 
+void Client::wait(){
+    bool waiting;
+    std::string action;
+    do{
+        std::cout << "Indique acción al server:"<<std::endl;
+        std::cin >> action;
+
+        /*Se le manda la orden al server*/
+
+        /*De acuerdo con la respuesta, se cambia el valor de waiting*/
+
+    }while(waiting);
+}
+
+void Client::in_game(){
+
+}
+
 void Client::print_board(){
     for(int i = 0; i < 10; i++){
         for(int j = 0; j < 10; j++){
@@ -116,12 +134,17 @@ bool Client::set_board(){
     return true;
 }
 
+
+
 bool Client::set_to_up(int size, int x, int y){
     int boundary = x + size;
     if(boundary > 10){
         return false;
     }
     for(int i=0; i<size; i++){
+        if(nearing_boats(x+i, y)){
+            return false;
+        }
         board_[x+i][y] = "B";
     }
     return true;
@@ -133,6 +156,9 @@ bool Client::set_to_right(int size, int x, int y){
         return false;
     }
     for(int i=0; i<size; i++){
+        if(nearing_boats(x, y+i)){
+            return false;
+        }
         board_[x][y+i] = "B";
     }
     return true;
@@ -144,6 +170,9 @@ bool Client::set_to_down(int size, int x, int y){
         return false;
     }
     for(int i=0; i<size; i++){
+        if(nearing_boats(x-i, y)){
+            return false;
+        }
         board_[x-i][y] = "B";
     }
     return true;
@@ -155,7 +184,49 @@ bool Client::set_to_left(int size, int x, int y){
         return false;
     }
     for(int i=0; i<size; i++){
+        if(nearing_boats(x, y-i)){
+            return false;
+        }
         board_[x][y-i] = "B";
     }
     return true;
+}
+
+bool Client::nearing_boats(int x, int y){        //rudimentary, might want to change it :P
+    if(board_[x+1][y] == "B")
+    {
+        return true;
+    }
+    else if(board_[x-1][y] == "B")
+    {
+        return true;
+    }
+    else if(board_[x][y+1] == "B")
+    {
+        return true;
+    }
+    else if(board_[x][y-1] == "B")
+    {
+        return true;
+    }
+    else if(board_[x+1][y+1] == "B")
+    {
+        return true;
+    }
+    else if(board_[x+1][y-1] == "B")
+    {
+        return true;
+    }
+    else if(board_[x-1][y+1] == "B")
+    {
+        return true;
+    }
+    else if(board_[x-1][y-1] == "B")
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

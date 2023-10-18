@@ -31,7 +31,7 @@ class Game{
         void set_turn_player2(bool your_turn){turn_player2_ = your_turn;}
 
         //Methods
-        void start();
+        bool start();
 
 };
 

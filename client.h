@@ -34,12 +34,16 @@ class Client{
 
         //Methods
         bool connect();
+        void wait();
+        void in_game();
+
         void print_board();
         bool set_board();
         bool set_to_up(int size, int x, int y);
         bool set_to_right(int size, int x, int y);
         bool set_to_down(int size, int x, int y);
         bool set_to_left(int size, int x, int y);
+        bool nearing_boats(int x, int y);
 
 };
 

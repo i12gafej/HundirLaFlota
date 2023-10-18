@@ -11,12 +11,20 @@ Game::Game(Client player1, Client player2){
     turn_player2_ = false;
 }
 
-void Game::start(){
+bool Game::start(){
     player1_.set_board();
     player2_.set_board();
 
     while(this->is_running()){          //must be prepared for requests depending on turns
+        turn_player1_ = true;
+        turn_player2_ = false;
+
+
+
+        turn_player1_ = false;
+        turn_player2_ = true;
 
     }
 
+    return true; //when the game has finished (so the server and the client will know)
 }
