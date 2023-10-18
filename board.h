@@ -28,7 +28,6 @@ class Board{
         
 
         //Methods
-        void initialise_board();
         void print_board();
 
 };

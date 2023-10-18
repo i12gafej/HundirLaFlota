@@ -13,6 +13,10 @@ class Client{
         int id_;
         std::string password_;
         Board board_;
+        
+        std::vector<int> boats;
+        /*Había pensado en algo así como tener un vector con los el tamaño de los barcos
+        y que cuando se vayan colocando se haga delete de esos tamaños*/
 
     public:
         //Constructor
