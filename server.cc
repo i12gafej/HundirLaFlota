@@ -10,16 +10,16 @@ bool Server::start(){
 	struct sockaddr_in sockname, from;
 	char buffer[MSG_SIZE];
 	socklen_t from_len;
-    	fd_set readfds, auxfds;
-   	 int salida;
-   	 int arrayClientes[MAX_CLIENTS];
-    	int numClientes = 0;
+    fd_set readfds, auxfds;
+   	int salida;
+   	int arrayClientes[MAX_CLIENTS];
+    int numClientes = 0;
    	 //contadores
-    	int i,j,k;
+    int i,j,k;
 	int recibidos;
-   	 char identificador[MSG_SIZE];
+   	char identificador[MSG_SIZE];
     
-    	int on, ret;
+    int on, ret;
 
     
     
@@ -72,13 +72,132 @@ bool Server::start(){
     	printf("El servidor está esperando conexiones...\n");	//Inicializar los conjuntos fd_set
     	
 	FD_ZERO(&readfds);
-    	FD_ZERO(&auxfds);
-    	FD_SET(sd,&readfds);
-    	FD_SET(0,&readfds);
+    FD_ZERO(&auxfds);
+    FD_SET(sd,&readfds);
+    FD_SET(0,&readfds);
     
-   	
-    	//Capturamos la señal SIGINT (Ctrl+c)
-    	signal(SIGINT,manejador);
+
+    //Capturamos la señal SIGINT (Ctrl+c)
+    signal(SIGINT,manejador);
+    while(1){
+            
+            //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
+            
+            auxfds = readfds;
+            
+            salida = select(FD_SETSIZE,&auxfds,NULL,NULL,NULL);
+            
+            if(salida > 0){
+                
+                
+                for(i=0; i<FD_SETSIZE; i++){
+                    
+                    //Buscamos el socket por el que se ha establecido la comunicación
+                    if(FD_ISSET(i, &auxfds)) {
+                        
+                        if( i == sd){
+                            
+                            if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1){
+                                perror("Error aceptando peticiones");
+                            }
+                            else
+                            {
+                                if(numClientes < MAX_CLIENTS){
+                                    arrayClientes[numClientes] = new_sd;
+                                    numClientes++;
+                                    FD_SET(new_sd,&readfds);
+                                
+                                    strcpy(buffer, "Bienvenido al chat\n");
+                                
+                                    send(new_sd,buffer,sizeof(buffer),0);
+                                
+                                    for(j=0; j<(numClientes-1);j++){
+                                    
+                                        bzero(buffer,sizeof(buffer));
+                                        sprintf(buffer, "Nuevo Cliente conectado en <%d>",new_sd);
+                                        send(arrayClientes[j],buffer,sizeof(buffer),0);
+                                    }
+                                }
+                                else
+                                {
+                                    bzero(buffer,sizeof(buffer));
+                                    strcpy(buffer,"Demasiados clientes conectados\n");
+                                    send(new_sd,buffer,sizeof(buffer),0);
+                                    close(new_sd);
+                                }
+                                
+                            }
+                            
+                            
+                        }
+                        else if (i == 0){
+                            //Se ha introducido información de teclado
+                            bzero(buffer, sizeof(buffer));
+                            fgets(buffer, sizeof(buffer),stdin);
+                            
+                            //Controlar si se ha introducido "SALIR", cerrando todos los sockets y finalmente saliendo del servidor. (implementar)
+                            if(strcmp(buffer,"SALIR\n") == 0){
+                             
+                                for (j = 0; j < numClientes; j++){
+						   bzero(buffer, sizeof(buffer));
+						   strcpy(buffer,"Desconexión servidor\n"); 
+                                    send(arrayClientes[j],buffer , sizeof(buffer),0);
+                                    close(arrayClientes[j]);
+                                    FD_CLR(arrayClientes[j],&readfds);
+                                }
+                                    close(sd);
+                                    exit(-1);
+                                
+                                
+                            }
+                            //Mensajes que se quieran mandar a los clientes (implementar)
+                            
+                        } 
+                        else{
+                            bzero(buffer,sizeof(buffer));
+                            
+                            recibidos = recv(i,buffer,sizeof(buffer),0);
+                            
+                            if(recibidos > 0){
+                                
+                                if(strcmp(buffer,"SALIR\n") == 0){
+                                    
+                                    salirCliente(i,&readfds,&numClientes,arrayClientes);
+                                    
+                                }
+                                else{
+                                    
+                                    sprintf(identificador,"<%d>: %s",i,buffer);
+                                    bzero(buffer,sizeof(buffer));
+
+                                    strcpy(buffer,identificador);
+
+                                    printf("%s\n", buffer);
+
+                                    for(j=0; j<numClientes; j++)
+                                        if(arrayClientes[j] != i)
+                                            send(arrayClientes[j],buffer,sizeof(buffer),0);
+
+                                    
+                                }
+                                                                
+                                
+                            }
+                            //Si el cliente introdujo ctrl+c
+                            if(recibidos== 0)
+                            {
+                                printf("El socket %d, ha introducido ctrl+c\n", i);
+                                //Eliminar ese socket
+                                //salirCliente(i,&readfds,&numClientes,arrayClientes);
+                            }
+                        }
+                    }
+                }
+            }
+		}
+
+	close(sd);
+	return 0;
 }
 
 bool Server::close(){
