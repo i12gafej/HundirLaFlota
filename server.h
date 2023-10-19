@@ -16,7 +16,7 @@
 #include <iostream>
 
 #define MSG_SIZE 250
-#define MAX_CLIENTS 50
+#define MAX_CLIENTS 30
 
 //
 //
