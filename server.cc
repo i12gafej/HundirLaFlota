@@ -143,7 +143,7 @@ bool Server::start(){
                             buffer = "";
                             recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
                             buffer.assign(cbuffer);
-                            
+                            std::string aux;
                             if(recibidos > 0){
                                 
                                 if(buffer == "SALIR\n"){
@@ -151,8 +151,11 @@ bool Server::start(){
                                     close_client(i,&readfds,&numClientes,arrayClientes);
                                     
                                 }
-                                else if(buffer == "USUARIO "){
+                                else if(buffer.substr(0, 8) == "USUARIO "){
+                                    aux = buffer.substr(8, buffer.size());
                                     
+
+
                                 }
                                 else{
                                     
