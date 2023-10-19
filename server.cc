@@ -229,5 +229,5 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
 
 }
 bool Server::checkLogin(std::string string){
-    size_t ;
+    size_t sitio;
 }
