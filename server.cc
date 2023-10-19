@@ -153,7 +153,7 @@ bool Server::start(){
                                 }
                                 else if(buffer.substr(0, 8) == "USUARIO "){
                                     aux = buffer.substr(8, buffer.size());
-                                    
+                                    //if (indice != std::string::npos) {
 
 
                                 }
@@ -227,4 +227,7 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
             send(arrayClientes[j],buffer,sizeof(buffer),0);
 
 
+}
+bool Server::checkLogin(std::string string){
+    size_t ;
 }
