@@ -6,9 +6,10 @@
 #include <iostream>
 #include <cstring>
 
-Client::Client(std::string id, std::string password){
+Client::Client(std::string id, std::string password, int sd){
     id_ = id;
     password_ = password;
+    sd_ = sd;
     waiting = true;
 
     std::vector<std::vector<std::string>> aux (10, std::vector<std::string>(10, "A"));      //init the board
@@ -16,17 +17,15 @@ Client::Client(std::string id, std::string password){
 }
 
 
-void Client::wait(){
-    bool waiting, right_message;
+bool Client::wait(){
     char action[100];
-    do{
+    fgets(action, sizeof(action), stdin);
+    action[strlen(action)-1] = '\0';
 
-
-        /*Se le manda la orden al server*/
-
-        /*De acuerdo con la respuesta, se cambia el valor de waiting*/
-
-    }while(waiting);
+    if(send(sd_, action, sizeof(action), 0) == -1) {
+        std::cout << "Error al enviar el mensaje\n";
+        return false;
+   	}
 }
 
 void Client::in_game(){

@@ -34,7 +34,7 @@ int main(){
 
 	printf("Conectado al servidor.\n");
 
-    do{
+    do{                                 //probably to be deleted
         char action[100];
 
         std::cout << "Introduzca una orden\n";
@@ -61,15 +61,24 @@ int main(){
     		}
 
             /*OJO A PARTIR DE AQUÍ, HAY QUE ESPERAR A LA RESPUESTA DEL SERVER DE JAVI*/
+
             fgets(action, sizeof(action), stdin);
             action[strlen(action)-1] = '\0';
 
             placeholder = split(action, ' ');
             std::string password = placeholder[1];
 
-            Client(username, password);
+            Client client = Client(username, password, sd);
+            
+            while(true){
+                disconnect = client.wait();
+                if(disconnect){
+                    break;
+                }
+                
+            }
+            
 
-            /*Cositas de la clase Client al fin*/
 
         }
 

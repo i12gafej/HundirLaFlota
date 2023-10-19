@@ -22,7 +22,9 @@ class Client{
         std::string id_;
         std::string password_;
         std::vector<std::vector<std::string>> board_;
+        int sd_;
         bool waiting;
+
 
         /*Había pensado en algo así como tener un vector con los el tamaño de los barcos
         y que cuando se vayan colocando se haga delete de esos tamaños.
@@ -31,19 +33,20 @@ class Client{
 
     public:
         //Constructor
-        Client(std::string id, std::string password);
+        Client(std::string id, std::string password, int sd);
 
         //Getters
-        int get_id(){return id_;}
+        std::string get_id(){return id_;}
         std::string get_password(){return password_;}
         std::vector<std::vector<std::string>> get_board(){return board_;}
+        int get_socket(){return sd_;}
 
         //Setters
-        void set_id(int id){id_ = id;}
+        void set_id(std::string id){id_ = id;}
         void set_password(std::string password){password_ = password;}
 
         //Methods
-        void wait();
+        bool wait();        //returns disconnetion status
         void in_game();
 
         void print_board();
