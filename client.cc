@@ -103,7 +103,6 @@ bool Client::set_board(){
 
     }while(counter < 2);
 
-    //FOO
     counter = 0;
     boat_size = 2;
     do{
@@ -146,6 +145,9 @@ bool Client::set_to_up(int size, int x, int y){
         if(nearing_boats(x+i, y)){
             return false;
         }
+    }
+
+    for(int i=0; i<size; i++){
         board_[x+i][y] = "B";
     }
     return true;
@@ -160,6 +162,8 @@ bool Client::set_to_right(int size, int x, int y){
         if(nearing_boats(x, y+i)){
             return false;
         }
+    }
+    for(int i=0; i<size; i++){
         board_[x][y+i] = "B";
     }
     return true;
@@ -174,6 +178,8 @@ bool Client::set_to_down(int size, int x, int y){
         if(nearing_boats(x-i, y)){
             return false;
         }
+    }
+    for(int i=0; i<size; i++){
         board_[x-i][y] = "B";
     }
     return true;
@@ -188,6 +194,8 @@ bool Client::set_to_left(int size, int x, int y){
         if(nearing_boats(x, y-i)){
             return false;
         }
+    }
+    for(int i=0; i<size; i++){
         board_[x][y-i] = "B";
     }
     return true;
