@@ -103,6 +103,7 @@ bool Client::set_board(){
 
     }while(counter < 2);
 
+    //FOO
     counter = 0;
     boat_size = 2;
     do{
