@@ -4,8 +4,9 @@
 #include "client.h"
 #include <ctime>
 #include <iostream>
+#include <cstring>
 
-Client::Client(int id, std::string password){
+Client::Client(std::string id, std::string password){
     id_ = id;
     password_ = password;
     waiting = true;
@@ -14,17 +15,12 @@ Client::Client(int id, std::string password){
     board_ = aux;
 }
 
-bool Client::connect(){
-
-    return true;        //placeholder
-}
 
 void Client::wait(){
-    bool waiting;
-    std::string action;
+    bool waiting, right_message;
+    char action[100];
     do{
-        std::cout << "Indique acción al server:"<<std::endl;
-        std::cin >> action;
+
 
         /*Se le manda la orden al server*/
 
@@ -238,4 +234,12 @@ bool Client::nearing_boats(int x, int y){        //rudimentary, might want to ch
     {
         return false;
     }
+}
+
+void Client::print_allowed_messages(){
+    std::cout << 
+}
+
+bool Client::check_for_right_message(char* message){
+
 }

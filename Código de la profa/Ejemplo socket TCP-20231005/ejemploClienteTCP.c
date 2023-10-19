@@ -72,16 +72,10 @@ int main ( )
 		if (send(sd, buffer, sizeof(buffer), 0) == -1) {
         		perror("Error al enviar el mensaje");
        			 exit(1);
-   		 }
+   		}
+    	printf("Respuesta del servidor: %s\n", buffer);
 
-		// Recibir respuesta del servidor
-   		bzero(buffer, sizeof(buffer));
-   		if (recv(sd, buffer, sizeof(buffer), 0) == -1) {
-        		perror("Error al recibir la respuesta");
-        		exit(1);
-    		}
-
-    		printf("Respuesta del servidor: %s\n", buffer);
+		Client()
 
 				
 	}while(!salir);

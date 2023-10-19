@@ -6,10 +6,20 @@
 
 #include <string>
 #include <vector>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <iostream>
 
 class Client{
     private:
-        int id_;
+        std::string id_;
         std::string password_;
         std::vector<std::vector<std::string>> board_;
         bool waiting;
@@ -21,7 +31,7 @@ class Client{
 
     public:
         //Constructor
-        Client(int id, std::string password);
+        Client(std::string id, std::string password);
 
         //Getters
         int get_id(){return id_;}
@@ -33,7 +43,6 @@ class Client{
         void set_password(std::string password){password_ = password;}
 
         //Methods
-        bool connect();
         void wait();
         void in_game();
 
@@ -44,6 +53,9 @@ class Client{
         bool set_to_down(int size, int x, int y);
         bool set_to_left(int size, int x, int y);
         bool nearing_boats(int x, int y);
+
+        void print_allowed_messages();
+        bool check_for_right_message(char* message);
 
 };
 

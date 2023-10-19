@@ -6,7 +6,7 @@
 Game::Game(Client player1, Client player2){
     player1_ = player1;
     player2_ = player2;
-    running_=true;
+    running_= true;
     turn_player1_ = false;
     turn_player2_ = false;
 }
@@ -18,7 +18,6 @@ bool Game::start(){
     while(this->is_running()){          //must be prepared for requests depending on turns
         turn_player1_ = true;
         turn_player2_ = false;
-
 
 
         turn_player1_ = false;
