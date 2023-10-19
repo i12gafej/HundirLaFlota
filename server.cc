@@ -109,7 +109,7 @@ bool Server::start(){
                                     FD_SET(new_sd,&readfds);
                                 
                                     //strcpy(buffer, "Bienvenido al chat\n");
-                                    buffer = "Bienvenido al chat";
+                                    buffer = "+0k. Usuario conectado";
                                     
                                     send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
                                 
