@@ -1,6 +1,9 @@
 {
     "files.associations": {
+<<<<<<< HEAD
         "Anotaciones_Seminario_1": "plaintext",
+=======
+>>>>>>> refs/remotes/origin/main
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -8,7 +11,10 @@
         "cstddef": "cpp",
         "cstdio": "cpp",
         "cstdlib": "cpp",
+<<<<<<< HEAD
         "cstring": "cpp",
+=======
+>>>>>>> refs/remotes/origin/main
         "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
@@ -17,11 +23,17 @@
         "bit": "cpp",
         "*.tcc": "cpp",
         "compare": "cpp",
+<<<<<<< HEAD
         "complex": "cpp",
         "concepts": "cpp",
         "cstdint": "cpp",
         "deque": "cpp",
         "map": "cpp",
+=======
+        "concepts": "cpp",
+        "cstdint": "cpp",
+        "deque": "cpp",
+>>>>>>> refs/remotes/origin/main
         "string": "cpp",
         "unordered_map": "cpp",
         "vector": "cpp",
@@ -46,7 +58,10 @@
         "new": "cpp",
         "numbers": "cpp",
         "ostream": "cpp",
+<<<<<<< HEAD
         "sstream": "cpp",
+=======
+>>>>>>> refs/remotes/origin/main
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",

@@ -80,47 +80,41 @@ bool Server::start(){
 
     //Capturamos la señal SIGINT (Ctrl+c)
     signal(SIGINT,manejador);
+    //SIEMPRE ESTA ESPERANDO COSAS
     while(1){
             
             //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
             
             auxfds = readfds;
-            
+            //select te da el numero de descriptores + 1 activos
             salida = select(FD_SETSIZE,&auxfds,NULL,NULL,NULL);
             
+            //si ha leido
             if(salida > 0){
                 
-                
+                //recorre los descriptores
                 for(i=0; i<FD_SETSIZE; i++){
                     
                     //Buscamos el socket por el que se ha establecido la comunicación
                     if(FD_ISSET(i, &auxfds)) {
-                        
+                        //si el socket con el que se ha establecido la conexion es el que buscamos
                         if( i == sd){
-                            
+                            //asignamos el nuevo sd del actual
                             if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1){
                                 perror("Error aceptando peticiones");
                             }
                             else
                             {
+                                //siempre que no se haya excedido el maximo de clientes
                                 if(numClientes < MAX_CLIENTS){
                                     arrayClientes[numClientes] = new_sd;
                                     numClientes++;
                                     FD_SET(new_sd,&readfds);
                                 
                                     //strcpy(buffer, "Bienvenido al chat\n");
-                                    buffer = "Bienvenido al chat";
+                                    buffer = "+0k. Usuario conectado";
                                     
                                     send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
-                                
-                                    for(j=0; j<(numClientes-1);j++){
-                                    
-                                        //bzero(buffer,sizeof(buffer));
-                                        buffer = "";
-                                        //sprintf(buffer, "Nuevo Cliente conectado en <%d>",new_sd);
-                                        buffer = "Nuevo Cliente conectado en <" + std::to_string(new_sd) + ">";
-                                        send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
-                                    }
                                 }
                                 else
                                 {
@@ -141,25 +135,6 @@ bool Server::start(){
                             buffer = "";
                             fgets(cbuffer, sizeof(cbuffer),stdin);
                             buffer.assign(cbuffer);
-                            
-                            
-                            //Controlar si se ha introducido "SALIR", cerrando todos los sockets y finalmente saliendo del servidor. (implementar)
-                            if(buffer == "SALIR\n"){
-                             
-                                for (j = 0; j < numClientes; j++){
-						            //bzero(buffer, sizeof(buffer));
-                                    buffer = "";
-						            //strcpy(buffer,"Desconexión servidor\n"); 
-                                    buffer = "Desconexión sevidor\n";
-                                    send(arrayClientes[j],buffer.c_str() , sizeof(buffer.c_str()),0);
-                                    close(arrayClientes[j]);
-                                    FD_CLR(arrayClientes[j],&readfds);
-                                }
-                                    close(sd);
-                                    exit(-1);
-                                
-                                
-                            }
                             //Mensajes que se quieran mandar a los clientes (implementar)
                             
                         } 
@@ -168,13 +143,19 @@ bool Server::start(){
                             buffer = "";
                             recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
                             buffer.assign(cbuffer);
-                            
+                            std::string aux;
                             if(recibidos > 0){
                                 
                                 if(buffer == "SALIR\n"){
                                     
                                     close_client(i,&readfds,&numClientes,arrayClientes);
                                     
+                                }
+                                else if(buffer.substr(0, 8) == "USUARIO "){
+                                    aux = buffer.substr(8, buffer.size());
+                                    //if (indice != std::string::npos) {
+
+
                                 }
                                 else{
                                     
@@ -246,4 +227,7 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
             send(arrayClientes[j],buffer,sizeof(buffer),0);
 
 
+}
+bool Server::checkLogin(std::string string){
+    size_t sitio;
 }
