@@ -2,6 +2,7 @@
 //
 
 #include "client.h"
+#include "functionality.h"
 
 int main(){
 
@@ -38,7 +39,7 @@ int main(){
 
         std::cout << "Introduzca una orden\n";
         fgets(action, sizeof(action), stdin);
-        action[strlen(action-1)] = action;
+        action[strlen(action)-1] = '\0';
 
         if(strcmp(buffer, "SALIR") == 0){               //no need for more actions
             disconnect = true;
@@ -50,17 +51,8 @@ int main(){
        	    	exit(EXIT_FAILURE);
    		    }
 
-            /*TODO*/
-            std::string placeholder1(action);
-            std::vector<std::string> parts1;
-            std::string part1;
-
-            while (std::getline(placeholder1, part1, " ")) {
-                parts1.push_back(part1);
-            }
-
-            std::string username = part[1];
-
+            std::vector<std::string> placeholder = split(action, ' ');
+            std::string username = placeholder[1];
 
             bzero(action, sizeof(action));
    		    if (recv(sd, action, sizeof(action), 0) == -1) {
@@ -70,21 +62,14 @@ int main(){
 
             /*OJO A PARTIR DE AQUÍ, HAY QUE ESPERAR A LA RESPUESTA DEL SERVER DE JAVI*/
             fgets(action, sizeof(action), stdin);
-            action[strlen(action-1)] = action;
+            action[strlen(action)-1] = '\0';
 
-            std::string placeholder2(action);
-            std::vector<std::string> parts2;
-            std::string part2;
-
-            while (std::getline(placeholder2, part2, " ")) {
-                parts2.push_back(part2);
-            }
-
-            std::string password = part[1];
+            placeholder = split(action, ' ');
+            std::string password = placeholder[1];
 
             Client(username, password);
 
-            /*Cositas de client al fin coño*/
+            /*Cositas de la clase Client al fin*/
 
         }
 

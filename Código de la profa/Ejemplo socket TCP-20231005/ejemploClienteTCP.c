@@ -75,8 +75,6 @@ int main ( )
    		}
     	printf("Respuesta del servidor: %s\n", buffer);
 
-		Client()
-
 				
 	}while(!salir);
 	
