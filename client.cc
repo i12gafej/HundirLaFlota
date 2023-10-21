@@ -236,7 +236,14 @@ bool Client::nearing_boats(int x, int y){        //rudimentary, might want to ch
 }
 
 void Client::print_allowed_messages(){
-    std::cout << 
+    std::cout << "Los mensajes permitidos son:\n"
+        "USUARIO <username>: se pide el registro con ese usuario\n"
+        "PASSWORD <password>: se introduce la contraseña para el usuario anterior\n"
+        "REGISTRO -u <usuario> -p <password>: se añade al sistema ese usuario con esa"
+            "contraseña\n"
+        "INICIAR-PARTIDA: se le pide al servidor entrar en partida\n"
+        "DISPARO <letra>,<numero>: en una partida, se dispara a esas coordenadas\n"
+        "SALIR: se desconecta del servidor\n";
 }
 
 bool Client::check_for_right_message(char* message){
