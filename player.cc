@@ -1,12 +1,12 @@
 //
 //
 
-#include "client.h"
+#include "player.h"
 #include <ctime>
 #include <iostream>
 #include <cstring>
 
-Client::Client(std::string id, std::string password, int sd){
+Player::Player(std::string id, std::string password, int sd){
     id_ = id;
     password_ = password;
     sd_ = sd;
@@ -16,23 +16,11 @@ Client::Client(std::string id, std::string password, int sd){
     board_ = aux;
 }
 
-
-bool Client::wait(){
-    char action[100];
-    fgets(action, sizeof(action), stdin);
-    action[strlen(action)-1] = '\0';
-
-    if(send(sd_, action, sizeof(action), 0) == -1) {
-        std::cout << "Error al enviar el mensaje\n";
-        return false;
-   	}
-}
-
-void Client::in_game(){
+void Player::in_game(){
 
 }
 
-void Client::print_board(){
+void Player::print_board(){
     for(int i = 0; i < 10; i++){
         for(int j = 0; j < 10; j++){
             std::cout << board_[i][j]; 
@@ -40,7 +28,7 @@ void Client::print_board(){
     }
 }
 
-bool Client::set_board(){
+bool Player::set_board(){
 
     srand(time(0));
     
@@ -131,7 +119,7 @@ bool Client::set_board(){
 
 
 
-bool Client::set_to_up(int size, int x, int y){
+bool Player::set_to_up(int size, int x, int y){
     int boundary = x + size;
     if(boundary > 10){
         return false;
@@ -148,7 +136,7 @@ bool Client::set_to_up(int size, int x, int y){
     return true;
 }
 
-bool Client::set_to_right(int size, int x, int y){
+bool Player::set_to_right(int size, int x, int y){
     int boundary = y + size;
     if(boundary > 10){
         return false;
@@ -164,7 +152,7 @@ bool Client::set_to_right(int size, int x, int y){
     return true;
 }
 
-bool Client::set_to_down(int size, int x, int y){
+bool Player::set_to_down(int size, int x, int y){
     int boundary = x - size;
     if(boundary < 0){
         return false;
@@ -180,7 +168,7 @@ bool Client::set_to_down(int size, int x, int y){
     return true;
 }
 
-bool Client::set_to_left(int size, int x, int y){
+bool Player::set_to_left(int size, int x, int y){
     int boundary = y - size;
     if(boundary < 0){
         return false;
@@ -196,7 +184,7 @@ bool Client::set_to_left(int size, int x, int y){
     return true;
 }
 
-bool Client::nearing_boats(int x, int y){        //rudimentary, might want to change it :P
+bool Player::nearing_boats(int x, int y){        //rudimentary, might want to change it :P
     if(board_[x+1][y] == "B")
     {
         return true;
@@ -235,7 +223,7 @@ bool Client::nearing_boats(int x, int y){        //rudimentary, might want to ch
     }
 }
 
-void Client::print_allowed_messages(){
+void Player::print_allowed_messages(){
     std::cout << "Los mensajes permitidos son:\n"
         "USUARIO <username>: se pide el registro con ese usuario\n"
         "PASSWORD <password>: se introduce la contraseña para el usuario anterior\n"
@@ -246,6 +234,7 @@ void Client::print_allowed_messages(){
         "SALIR: se desconecta del servidor\n";
 }
 
-bool Client::check_for_right_message(char* message){
 
+void Player::set_position(int x, int y, std::string state){
+    board_[x][y] = state;
 }

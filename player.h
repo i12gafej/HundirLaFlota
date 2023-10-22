@@ -17,7 +17,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 
-class Client{
+class Player{
     private:
         std::string id_;
         std::string password_;
@@ -33,7 +33,7 @@ class Client{
 
     public:
         //Constructor
-        Client(std::string id, std::string password, int sd);
+        Player(std::string id, std::string password, int sd);
 
         //Getters
         std::string get_id(){return id_;}
@@ -56,6 +56,7 @@ class Client{
         bool set_to_down(int size, int x, int y);
         bool set_to_left(int size, int x, int y);
         bool nearing_boats(int x, int y);
+        void set_position(int x, int y, std::string state);
 
         void print_allowed_messages();
         bool check_for_right_message(char* message);
