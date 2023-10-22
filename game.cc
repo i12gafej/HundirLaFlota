@@ -98,25 +98,25 @@ std::string Game::attack(bool player_turn, std::string x, int y){
 
 int Game::coordinate_conversion_engine(std::string s){
     if(s == "A"){
-        return 1;
+        return 0;
     }else if(s == "B"){
-        return 2;
+        return 1;
     }else if(s == "C"){
-        return 3;
+        return 2;
     }else if(s == "D"){
-        return 4;
+        return 3;
     }else if(s == "E"){
-        return 5;
+        return 4;
     }else if(s == "F"){
-        return 6;
+        return 5;
     }else if(s == "G"){
-        return 7;
+        return 6;
     }else if(s == "H"){
-        return 8;
+        return 7;
     }else if(s == "I"){
-        return 9;
+        return 8;
     }else{
-        return 10;
+        return 9;
     }
 }
 
