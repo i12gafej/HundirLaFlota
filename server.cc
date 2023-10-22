@@ -145,17 +145,16 @@ bool Server::start(){
                             buffer.assign(cbuffer);
                             std::string aux;
                             if(recibidos > 0){
-                                
-                                if(buffer == "SALIR\n"){
+                                std::istringstream stream(buffer);
+                                stream >> aux;
+                                if(aux == "SALIR"){
                                     
                                     close_client(i,&readfds,&numClientes,arrayClientes);
                                     
                                 }
-                                else if(buffer.substr(0, 8) == "USUARIO "){
-                                    aux = buffer.substr(8, buffer.size());
-                                    //if (indice != std::string::npos) {
-
-
+                                else if(aux == "USUARIO"){
+                                    stream >> aux;
+                                    checkLogin(aux);
                                 }
                                 else{
                                     
@@ -229,5 +228,14 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
 
 }
 bool Server::checkLogin(std::string string){
-    size_t sitio;
+    std::vector<std::string> loginArray = getLogins();
+    for(int i = 0; i < loginArray.size(); i++){
+        if(string == loginArray[i]){
+            return true;
+        }
+    }
+    return false;
+}
+void setLoginArray(std::vector<std::string> array){
+    
 }
