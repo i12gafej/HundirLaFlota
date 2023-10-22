@@ -46,7 +46,6 @@ class Player{
         void set_password(std::string password){password_ = password;}
 
         //Methods
-        bool wait();        //returns disconnetion status
         void in_game();
 
         void print_board();
