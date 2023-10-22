@@ -40,3 +40,11 @@ class Game{
 };
 
 #endif
+
+/*NOTAS:
+    Para esperar la recepción del server, se puede hacer una función tal que esté en un bucle while
+infinito hasta que se pueda leer del server.
+    Una aproximación puede ser asignar una variable siempre que se llame a la función al valor
+que va a permitir el bucle y que esté checkando siempre si se ha cambiado. La función de escucha
+o lo que sea está dentro del bucle y en cuanto se cambie se romperá el bucle y se obtendrán las
+coordenadas del disparo.*/
