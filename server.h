@@ -34,7 +34,7 @@ class Server{
     public:
 
     bool start();
-    bool close();
+    bool stop();
     inline bool start_game(){return false;};//puede ser q la necesite
     void close_client(int socket, fd_set * readfds, int * numClientes, int arrayClientes[]);
 

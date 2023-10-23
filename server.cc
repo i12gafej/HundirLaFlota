@@ -82,165 +82,164 @@ bool Server::start(){
     signal(SIGINT,manejador);
     //SIEMPRE ESTA ESPERANDO COSAS
     while(1){
+        //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
+        
+        auxfds = readfds;
+        //select te da el numero de descriptores + 1 activos
+        salida = select(FD_SETSIZE,&auxfds,NULL,NULL,NULL);
+        
+        //si ha leido
+        if(salida > 0){
             
-            //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
-            
-            auxfds = readfds;
-            //select te da el numero de descriptores + 1 activos
-            salida = select(FD_SETSIZE,&auxfds,NULL,NULL,NULL);
-            
-            //si ha leido
-            if(salida > 0){
+            //recorre los descriptores
+            for(i=0; i<FD_SETSIZE; i++){
                 
-                //recorre los descriptores
-                for(i=0; i<FD_SETSIZE; i++){
-                    
-                    //Buscamos el socket por el que se ha establecido la comunicación
-                    if(FD_ISSET(i, &auxfds)) {
-                        //si el socket con el que se ha establecido la conexion es el que buscamos
-                        if( i == sd){
-                            //asignamos el nuevo sd del actual
-                            if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1){
-                                perror("Error aceptando peticiones");
+                //Buscamos el socket por el que se ha establecido la comunicación
+                if(FD_ISSET(i, &auxfds)) {
+                    //si el socket con el que se ha establecido la conexion es el que buscamos
+                    if( i == sd){
+                        //asignamos el nuevo sd del actual
+                        if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1){
+                            perror("Error aceptando peticiones");
+                        }
+                        else
+                        {
+                            //siempre que no se haya excedido el maximo de clientes
+                            if(numClientes < MAX_CLIENTS){
+                                arrayClientes[numClientes] = new_sd;
+                                numClientes++;
+                                FD_SET(new_sd,&readfds);
+                            
+                                //strcpy(buffer, "Bienvenido al chat\n");
+                                buffer = "+0k. Usuario conectado\n";
+                                for(j=0; j<(numClientes-1);j++){
+                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
+                                }
                             }
                             else
                             {
-                                //siempre que no se haya excedido el maximo de clientes
-                                if(numClientes < MAX_CLIENTS){
-                                    arrayClientes[numClientes] = new_sd;
-                                    numClientes++;
-                                    FD_SET(new_sd,&readfds);
-                                
-                                    //strcpy(buffer, "Bienvenido al chat\n");
-                                    buffer = "+0k. Usuario conectado";
-                                    
-                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
-                                }
-                                else
-                                {
-                                    //bzero(buffer,sizeof(buffer));
-                                    buffer = "";
-                                    buffer = "Demasiados clientes conectados\n";
-                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
-                                    close(new_sd);
-                                }
-                                
+                                //bzero(buffer,sizeof(buffer));
+                                buffer = "";
+                                buffer = "Demasiados clientes conectados\n";
+                                send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
+                                close(new_sd);
                             }
                             
-                            
                         }
-                        else if (i == 0){
-                            //Se ha introducido información de teclado
-                            bzero(cbuffer, sizeof(cbuffer));
-                            buffer = "";
-                            fgets(cbuffer, sizeof(cbuffer),stdin);
-                            buffer.assign(cbuffer);
-                            //Mensajes que se quieran mandar a los clientes (implementar)
-                            
-                        } 
-                        else{
-                            bzero(cbuffer,sizeof(cbuffer));
-                            buffer = "";
-                            recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
-                            buffer.assign(cbuffer);
-                            std::string aux, login = "nan", password;
-                            if(recibidos > 0){
-                                std::istringstream stream(buffer);
-                                stream >> aux;
-                                if(aux == "SALIR"){
-                                    
-                                    close_client(i,&readfds,&numClientes,arrayClientes);
-                                    
+                        
+                        
+                    }
+                    else if (i == 0){
+                        //Se ha introducido información de teclado
+                        bzero(cbuffer, sizeof(cbuffer));
+                        buffer = "";
+                        fgets(cbuffer, sizeof(cbuffer),stdin);
+                        buffer.assign(cbuffer);
+                        //Mensajes que se quieran mandar a los clientes (implementar)
+                        
+                    } 
+                    else{
+                        bzero(cbuffer,sizeof(cbuffer));
+                        buffer = "";
+                        recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
+                        buffer.assign(cbuffer);
+                        std::string aux, login = "nan", password;
+                        if(recibidos > 0){
+                            std::istringstream stream(buffer);
+                            stream >> aux;
+                            if(aux == "SALIR"){
+                                
+                                close_client(i,&readfds,&numClientes,arrayClientes);
+                                
+                            }
+                            else if(aux == "USUARIO"){
+                                stream >> login;
+                                flag_user = checkLogin(aux);
+                                if(flag_user){
+                                    //usuario registrado
+                                    buffer = "+Ok. Usuario correcto\n   Escriba la contraseña: \n";
+                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                }else{
+                                    buffer = "–Err. Usuario incorrecto\n";
+                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
-                                else if(aux == "USUARIO"){
-                                    stream >> login;
-                                    flag_user = checkLogin(aux);
-                                    if(flag_user){
-                                        //usuario registrado
-                                        buffer = "+Ok. Usuario correcto\n   Escriba la contraseña: \n";
-                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
-                                    }else{
-                                        buffer = "–Err. Usuario incorrecto\n";
-                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
-                                    }
+                            }
+                            else if(aux == "PASSWORD"){
+                                stream >> password;
+                                if(login == "nan"){
+                                    buffer = "Hay que añadir el usuario\n";
+                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
-                                else if(aux == "PASSWORD"){
-                                    stream >> password;
-                                    if(login == "nan"){
-                                        buffer = "Hay que añadir el usuario\n";
+                                else{
+                                    flag_pass = checkPassword(login, password);
+                                
+                                    if(flag_pass){
+                                        buffer = "+Ok. Usuario validado\n";
+                                        pushbackValid(login);
                                         send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
                                     else{
-                                        flag_pass = checkPassword(login, password);
-                                    
-                                        if(flag_pass){
-                                            buffer = "+Ok. Usuario validado\n";
-                                            pushbackValid(login);
-                                            send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
-                                        }
-                                        else{
-                                            buffer = "--Err. Error en la validación\n";
-                                            send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
-                                        }
+                                        buffer = "--Err. Error en la validación\n";
+                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
-                                    
-                                    
                                 }
-                                else if(aux == "REGISTRO"){
+                                
+                                
+                            }
+                            else if(aux == "REGISTRO"){
+                                stream >> aux;
+                                if(aux != "-u"){
+                                    buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                }
+                                else{
+                                    stream >> login;
                                     stream >> aux;
-                                    if(aux != "-u"){
+                                    if(aux != "-p"){
                                         buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
                                     }
                                     else{
-                                        stream >> login;
-                                        stream >> aux;
-                                        if(aux != "-p"){
-                                            buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                        stream >> password;
+                                        if(checkLogin(login)){
+                                            buffer = "Usuario ya registrado\n";
                                         }
                                         else{
-                                            stream >> password;
-                                            if(checkLogin(login)){
-                                                buffer = "Usuario ya registrado\n";
-                                            }
-                                            else{
-                                                addLogin(login, password);
-                                                pushbackValid(login);
-                                                buffer = "Usuario validado\n";
-                                                flag_singup = true;
-                                            }
-                                            
-                                            //flag_pass = true;
-                                            //flag_user = true;
+                                            addLogin(login, password);
+                                            pushbackValid(login);
+                                            buffer = "Usuario validado\n";
+                                            flag_singup = true;
                                         }
+                                        
+                                        //flag_pass = true;
+                                        //flag_user = true;
                                     }
-                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
-                                //else if()
-                                //queda mas
+                                send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                            }
+                            //else if()
+                            //queda mas
 
 
-                                
-                            }                                                             
-                                
-                        }
+                            
+                        }   
                             //Si el cliente introdujo ctrl+c
                         if(recibidos == 0)
                         {
                             printf("El socket %d, ha introducido ctrl+c\n", i);
                             //Eliminar ese socket
                             close_client(i,&readfds,&numClientes,arrayClientes);
-                        }
+                        }   
                     }
                 }
             }
+        }
     }
 
 	close(sd);
 	return 0;
 }
 
-bool Server::close(){
-
+bool Server::stop(){
+    return true;
 }
 void manejador (int signum){
     printf("\nSe ha recibido la señal sigint\n");
