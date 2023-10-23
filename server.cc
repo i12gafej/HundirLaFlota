@@ -143,7 +143,7 @@ bool Server::start(){
                             buffer = "";
                             recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
                             buffer.assign(cbuffer);
-                            std::string aux, login, password;
+                            std::string aux, login = "nan", password;
                             if(recibidos > 0){
                                 std::istringstream stream(buffer);
                                 stream >> aux;
@@ -166,15 +166,25 @@ bool Server::start(){
                                 }
                                 else if(aux == "PASSWORD"){
                                     stream >> password;
-                                    flag_pass = checkPassword(login, password);
-                                    if(flag_pass && flag_user){
-                                        buffer = "+Ok. Usuario validado\n";
+                                    if(login == "nan"){
+                                        buffer = "Hay que añadir el usuario\n";
                                         send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
                                     else{
-                                        buffer = "--Err. Error en la validación\n";
-                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                        flag_pass = checkPassword(login, password);
+                                    
+                                        if(flag_pass){
+                                            buffer = "+Ok. Usuario validado\n";
+                                            pushbackValid(login);
+                                            send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                        }
+                                        else{
+                                            buffer = "--Err. Error en la validación\n";
+                                            send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                        }
                                     }
+                                    
+                                    
                                 }
                                 else if(aux == "REGISTRO"){
                                     stream >> aux;
@@ -189,45 +199,41 @@ bool Server::start(){
                                         }
                                         else{
                                             stream >> password;
-                                            flag_singup = true;
+                                            if(checkLogin(login)){
+                                                buffer = "Usuario ya registrado\n";
+                                            }
+                                            else{
+                                                addLogin(login, password);
+                                                pushbackValid(login);
+                                                buffer = "Usuario validado\n";
+                                                flag_singup = true;
+                                            }
+                                            
                                             //flag_pass = true;
                                             //flag_user = true;
                                         }
                                     }
+                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
-                                
-                            }
-                            else{
-                                
-                                sprintf(identificador,"<%d>: %s",i,buffer);
-                                //bzero(buffer,sizeof(buffer));
-                                buffer = "";
-                                //strcpy(buffer,identificador);
-                                buffer.assign(identificador);
+                                //else if()
+                                //queda mas
 
-                                std::cout << buffer <<std::endl;
-
-                                for(j=0; j<numClientes; j++)
-                                    if(arrayClientes[j] != i)
-                                        send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
 
                                 
-                            }
-                                                                
+                            }                                                             
                                 
-                            }
+                        }
                             //Si el cliente introdujo ctrl+c
-                            if(recibidos== 0)
-                            {
-                                printf("El socket %d, ha introducido ctrl+c\n", i);
-                                //Eliminar ese socket
-                                close_client(i,&readfds,&numClientes,arrayClientes);
-                            }
+                        if(recibidos == 0)
+                        {
+                            printf("El socket %d, ha introducido ctrl+c\n", i);
+                            //Eliminar ese socket
+                            close_client(i,&readfds,&numClientes,arrayClientes);
                         }
                     }
                 }
             }
-		}
+    }
 
 	close(sd);
 	return 0;
@@ -251,20 +257,26 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
     FD_CLR(socket,readfds);
     
     //Re-estructurar el array de clientes
-    for (j = 0; j < (*numClientes) - 1; j++)
+    for (j = 0; j < (*numClientes) - 1; j++){
         if (arrayClientes[j] == socket)
             break;
-    for (; j < (*numClientes) - 1; j++)
-        (arrayClientes[j] = arrayClientes[j+1]);
+    }
+        
+    for (; j < (*numClientes) - 1; j++){
+         (arrayClientes[j] = arrayClientes[j+1]);
+    }
+       
     
     (*numClientes)--;
     
     bzero(buffer,sizeof(buffer));
     sprintf(buffer,"Desconexión del cliente <%d>",socket);
     
-    for(j=0; j<(*numClientes); j++)
+    for(j=0; j<(*numClientes); j++){
         if(arrayClientes[j] != socket)
             send(arrayClientes[j],buffer,sizeof(buffer),0);
+    }
+        
 
 
 }
@@ -303,4 +315,15 @@ void Server::setLoginArray(std::vector<std::tuple<std::string, std::string>> arr
     else{
         std::cerr << "No se pudo abrir el archivo \"login.txt\"." << std::endl;
     }
+}
+bool Server::addValid(std::string login){
+    auto old_valid = getValid();
+    for(int i = 0; i < old_valid.size(); i++){
+        if(login == old_valid[i]){
+            return false;
+        }
+    }
+    pushbackValid(login);
+    return true;
+
 }
