@@ -24,13 +24,7 @@ class Player{
         std::vector<std::vector<std::string>> board_;
         int sd_;
         bool waiting;
-
-
-        /*Había pensado en algo así como tener un vector con los el tamaño de los barcos
-        y que cuando se vayan colocando se haga delete de esos tamaños.
-        PD: Hay que mirar cuales son los barcos */
-        //std::vector<int> boats;
-
+        int shots_;
     public:
         //Constructor
         Player(std::string id, std::string password, int sd);
@@ -40,10 +34,12 @@ class Player{
         std::string get_password(){return password_;}
         std::vector<std::vector<std::string>> get_board(){return board_;}
         int get_socket(){return sd_;}
+        int get_shots(){return shots_;}
 
         //Setters
         void set_id(std::string id){id_ = id;}
         void set_password(std::string password){password_ = password;}
+        void shoot(){shots_++;}
 
         //Methods
         void in_game();
