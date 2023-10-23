@@ -129,7 +129,8 @@ bool Server::start(){
                         
                         
                     }
-                    else if (i == 0){
+                    else if (i == 0)
+                    {
                         //Se ha introducido información de teclado
                         bzero(cbuffer, sizeof(cbuffer));
                         buffer = "";
@@ -138,47 +139,59 @@ bool Server::start(){
                         //Mensajes que se quieran mandar a los clientes (implementar)
                         
                     } 
-                    else{
+                    else
+                    {
                         bzero(cbuffer,sizeof(cbuffer));
                         buffer = "";
                         recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
                         buffer.assign(cbuffer);
                         std::string aux, login = "nan", password;
-                        if(recibidos > 0){
+
+                        if(recibidos > 0)
+                        {
                             std::istringstream stream(buffer);
                             stream >> aux;
-                            if(aux == "SALIR"){
-                                
-                                close_client(i,&readfds,&numClientes,arrayClientes);
-                                
+                            if(aux == "SALIR")
+                            {
+                                close_client(i,&readfds,&numClientes,arrayClientes);   
                             }
-                            else if(aux == "USUARIO"){
+                            else if(aux == "USUARIO")
+                            {
                                 stream >> login;
                                 flag_user = checkLogin(aux);
-                                if(flag_user){
+
+                                if(flag_user)
+                                {
                                     //usuario registrado
                                     buffer = "+Ok. Usuario correcto\n   Escriba la contraseña: \n";
                                     send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
-                                }else{
+                                }
+                                else
+                                {
                                     buffer = "–Err. Usuario incorrecto\n";
                                     send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
                             }
-                            else if(aux == "PASSWORD"){
+                            else if(aux == "PASSWORD")
+                            {
                                 stream >> password;
-                                if(login == "nan"){
+                                if(login == "nan")
+                                {
                                     buffer = "Hay que añadir el usuario\n";
                                     send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
-                                else{
+                                else
+                                {
                                     flag_pass = checkPassword(login, password);
                                 
-                                    if(flag_pass){
+                                    if(flag_pass)
+                                    {
                                         buffer = "+Ok. Usuario validado\n";
                                         pushbackValid(login);
                                         send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
-                                    else{
+                                    else
+                                    {
                                         buffer = "--Err. Error en la validación\n";
                                         send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
@@ -186,23 +199,30 @@ bool Server::start(){
                                 
                                 
                             }
-                            else if(aux == "REGISTRO"){
+                            else if(aux == "REGISTRO")
+                            {
                                 stream >> aux;
-                                if(aux != "-u"){
+                                if(aux != "-u")
+                                {
                                     buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
                                 }
-                                else{
+                                else
+                                {
                                     stream >> login;
                                     stream >> aux;
                                     if(aux != "-p"){
                                         buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
                                     }
-                                    else{
+                                    else
+                                    {
                                         stream >> password;
-                                        if(checkLogin(login)){
+
+                                        if(checkLogin(login))
+                                        {
                                             buffer = "Usuario ya registrado\n";
                                         }
-                                        else{
+                                        else
+                                        {
                                             addLogin(login, password);
                                             pushbackValid(login);
                                             buffer = "Usuario validado\n";
@@ -247,6 +267,7 @@ void manejador (int signum){
     
     //Implementar lo que se desee realizar cuando ocurra la excepción de ctrl+c en el servidor
 }
+
 void Server::close_client(int socket, fd_set * readfds, int * numClientes, int arrayClientes[]){
   
     char buffer[250];
