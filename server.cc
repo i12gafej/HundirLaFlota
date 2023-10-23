@@ -2,7 +2,7 @@
 //
 
 #include "server.h"
-
+#include <errno.h>
 
 
 bool Server::start(){
@@ -79,7 +79,7 @@ bool Server::start(){
     
     bool flag_user = false, flag_pass = false, flag_singup = false, flag_init = false; 
     //Capturamos la señal SIGINT (Ctrl+c)
-    signal(SIGINT,manejador);
+    //signal(SIGINT,manejador);
     //SIEMPRE ESTA ESPERANDO COSAS
     while(1){
         //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
@@ -92,15 +92,18 @@ bool Server::start(){
         if(salida > 0){
             
             //recorre los descriptores
-            for(i=0; i<FD_SETSIZE; i++){
-                
+            for(i=0; i<FD_SETSIZE; i++)
+            {    
                 //Buscamos el socket por el que se ha establecido la comunicación
-                if(FD_ISSET(i, &auxfds)) {
+                if(FD_ISSET(i, &auxfds))
+                {
                     //si el socket con el que se ha establecido la conexion es el que buscamos
-                    if( i == sd){
+                    if( i == sd)
+                    {
                         //asignamos el nuevo sd del actual
-                        if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1){
-                            perror("Error aceptando peticiones");
+                        if((new_sd = accept(sd, (struct sockaddr *)&from, &from_len)) == -1)
+                        {
+                            printf("Error aceptando peticiones\n%d: %s", errno, strerror(errno));
                         }
                         else
                         {
@@ -111,7 +114,7 @@ bool Server::start(){
                                 FD_SET(new_sd,&readfds);
                             
                                 //strcpy(buffer, "Bienvenido al chat\n");
-                                buffer = "+0k. Usuario conectado\n";
+                                buffer = "+Ok. Usuario conectado\n";
                                 for(j=0; j<(numClientes-1);j++){
                                     send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
                                 }
@@ -152,7 +155,8 @@ bool Server::start(){
                             std::istringstream stream(buffer);
                             stream >> aux;
                             if(aux == "SALIR")
-                            {
+                            {   
+                                printf("El socket %d ha abandonado el servidor\n", i);
                                 close_client(i,&readfds,&numClientes,arrayClientes);   
                             }
                             else if(aux == "USUARIO")
@@ -168,7 +172,7 @@ bool Server::start(){
                                 }
                                 else
                                 {
-                                    buffer = "–Err. Usuario incorrecto\n";
+                                    buffer = "-Err. Usuario incorrecto\n";
                                     send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                 }
                             }
@@ -192,7 +196,7 @@ bool Server::start(){
                                     }
                                     else
                                     {
-                                        buffer = "--Err. Error en la validación\n";
+                                        buffer = "-Err. Error en la validación\n";
                                         send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
                                     }
                                 }
@@ -204,14 +208,14 @@ bool Server::start(){
                                 stream >> aux;
                                 if(aux != "-u")
                                 {
-                                    buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                    buffer = "Error de formato\nEnviar REGISTRO -u usuario -p password\n";
                                 }
                                 else
                                 {
                                     stream >> login;
                                     stream >> aux;
                                     if(aux != "-p"){
-                                        buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                        buffer = "Error de formato\nEnviar REGISTRO -u usuario -p password\n";
                                     }
                                     else
                                     {
@@ -262,8 +266,8 @@ bool Server::stop(){
     return true;
 }
 void manejador (int signum){
-    printf("\nSe ha recibido la señal sigint\n");
-    signal(SIGINT,manejador);
+    /*printf("\nSe ha recibido la señal sigint\n");
+    signal(SIGINT,manejador);*/
     
     //Implementar lo que se desee realizar cuando ocurra la excepción de ctrl+c en el servidor
 }

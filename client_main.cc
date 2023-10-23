@@ -58,7 +58,7 @@ int main(){
         if(FD_ISSET(sd, &auxfds)){              //server response
             bzero(buffer, sizeof(buffer));
             if (recv(sd, buffer, sizeof(buffer), 0) == -1) {
-        		printf("Error al recibir respuesta\n%d: %s\n", errno, strerror(errno));
+        		printf("ERROR al recibir respuesta\n%d: %s\n", errno, strerror(errno));
         		exit(EXIT_FAILURE);
     		}
 
@@ -92,9 +92,6 @@ int main(){
 
             }
         }
-
-        
-
             /*SERVER FUNCTIONALITIES, MAY COME HANDY WHEN IMPLEMENTING THE SERVER
             
             std::vector<std::string> placeholder = split(buffer, ' ');
@@ -128,12 +125,6 @@ int main(){
                 }
             }*/
             
-
-
-        
-
-
-
     }while(!disconnect);
     
 
