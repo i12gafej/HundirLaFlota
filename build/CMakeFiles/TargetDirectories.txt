@@ -1,3 +1,0 @@
-/home/daniel/Documentos/Redes/Prácticas/repo/HundirLaFlota/build/CMakeFiles/client.dir
-/home/daniel/Documentos/Redes/Prácticas/repo/HundirLaFlota/build/CMakeFiles/edit_cache.dir
-/home/daniel/Documentos/Redes/Prácticas/repo/HundirLaFlota/build/CMakeFiles/rebuild_cache.dir
