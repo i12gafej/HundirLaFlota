@@ -19,6 +19,7 @@
 #include <fstream>
 #include "player.h"
 #include <tuple>
+#include <mutex>
 
 #define MSG_SIZE 250
 #define MAX_CLIENTS 30

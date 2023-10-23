@@ -4,6 +4,10 @@
 #include "server.h"
 #include <errno.h>
 
+/*  Este mutex va a ser el que va a controlar que el juego no esté constantemente dando
+vueltas en con el mismo ataque una y otra vez.*/
+std::mutex query_mutex;
+
 
 bool Server::start(){
     int sd, new_sd;
@@ -79,7 +83,9 @@ bool Server::start(){
     
     bool flag_user = false, flag_pass = false, flag_singup = false, flag_init = false; 
     //Capturamos la señal SIGINT (Ctrl+c)
-    //signal(SIGINT,manejador);
+    //signal(SIGINT,manejador);                 //temporally deprecated
+
+
     //SIEMPRE ESTA ESPERANDO COSAS
     while(1){
         //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
@@ -108,7 +114,8 @@ bool Server::start(){
                         else
                         {
                             //siempre que no se haya excedido el maximo de clientes
-                            if(numClientes < MAX_CLIENTS){
+                            if(numClientes < MAX_CLIENTS)
+                            {
                                 arrayClientes[numClientes] = new_sd;
                                 numClientes++;
                                 FD_SET(new_sd,&readfds);
@@ -245,13 +252,23 @@ bool Server::start(){
                                 }
                                 send(i, cbuffer, sizeof(cbuffer), 0);
                             }
-                            //else if()
+                            else if(aux == "INICIAR-PARTIDA"){
+                                /*PASOS:
+                                1. Crear el player.
+                                2. Poner la flag a wait = true
+                                3. Comprobar en la lista de clientes si hay más esperando.
+                                3.1. Si no hay esperando, a esperar.
+                                3.2. Si hay esperando, se empieza el juego (se notifica a los
+                                    dos mediante el socket)
+                                Para el 3.2 es posible que haya que paralelizar fork y wait aquí dentro*/
+                                
+                            }
                             //queda mas
 
 
                             
-                        }   
-                            //Si el cliente introdujo ctrl+c
+                        }
+                        //Si el cliente introdujo ctrl+c
                         if(recibidos == 0)
                         {
                             printf("El socket %d, ha introducido ctrl+c\n", i);

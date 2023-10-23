@@ -11,6 +11,7 @@ Player::Player(std::string id, std::string password, int sd){
     password_ = password;
     sd_ = sd;
     waiting = true;
+    shots_= 0 ;
 
     std::vector<std::vector<std::string>> aux (10, std::vector<std::string>(10, "A"));      //init the board
     board_ = aux;

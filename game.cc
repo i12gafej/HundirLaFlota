@@ -2,18 +2,22 @@
 //
 
 #include "game.h"
+#include <errno.h>
+#include <string.h>
+#include <cstdlib>
 
 Game::Game(Player player1, Player player2){
     player1_ = player1;
     player2_ = player2;
     end_= false;
     turn_player1_ = false;
-    //turn_player2_ = false;
 }
 
 bool Game::start(){
     player1_.set_board();
     player2_.set_board();
+
+    char buff[100];
 
     bool end;
     std::string x, game_response;
@@ -22,19 +26,46 @@ bool Game::start(){
     do{                                 //must be prepared for requests depending on turns
         commute_player_turn();
 
-        /*LOGIC TO RETRIEVE INFO FROM THE SERVER
-            NOTE: the x and y have to be extrated from here.*/
+        bzero(buff, sizeof(buff));
+        if(turn_player1_){
+            if(recv(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
+                printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            player1_.shoot();
+        }
+        else
+        {
+            if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
+                printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            player2_.shoot();
+        }
 
         game_response = attack(turn_player1_, x, y);
 
-        /*LOGIC TO SEND INFORMATION TO THE SERVER
-            NOTE: it will send back the game_response info string, of may be treated here tho*/
+        if(turn_player1_){
+            if(send(player1_.get_socket(), game_response.c_str(), sizeof(game_response.c_str()), 0) < 0){
+                printf("ERROR en el envío del jugador 1\n%d: %s\n", errno, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            if(send(player2_.get_socket(), game_response.c_str(), sizeof(game_response.c_str()), 0) < 0){
+                printf("ERROR en el envío del jugador 2\n%d: %s\n", errno, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
 
         this->set_has_ended(ckeck_game_ended(turn_player1_));
 
     }while(!this->has_ended());
 
-    return true; //when the game has finished (so the server and the client will know)
+    /*Returns the turn of the player that has won. That means true for player 1 victory and
+    and false for player 2 victory. The printing can be done in the server, but also here lol*/
+    return turn_player1_;
 }
 
 std::string Game::attack(bool player_turn, std::string x, int y){
@@ -67,7 +98,9 @@ std::string Game::attack(bool player_turn, std::string x, int y){
                 return return_string;
             }
         }
-    }else{                                                  //player's 2 turn
+    }
+    else
+    {                                                  //player's 2 turn
         if(player1_.get_board()[aux_coord][y] == "A")
         {
             player1_.set_position(aux_coord,y,"X");
@@ -143,4 +176,12 @@ void Game::commute_player_turn(){
     }else{
         set_turn_player1(true);
     }
+}
+
+void Game::lock_mtx(){
+    mutex_.lock();
+}
+
+void Game::unlock_mtx(){
+    mutex_.unlock();
 }

@@ -5,12 +5,14 @@
 #define GAME_H
 
 #include "player.h"
+#include <mutex>
 
 class Game{
     private:
         Player player1_, player2_;
         bool end_;
         bool turn_player1_;     //if its not player1 turn, its player2 
+        std::mutex mutex_;
     
     public:
         //Constructor
@@ -36,6 +38,8 @@ class Game{
         std::string attack(bool player_turn, std::string x, int y);     //returns message of state of the attack
         bool ckeck_game_ended(bool turn);
         void commute_player_turn();
+        void lock_mtx();
+        void unlock_mtx();
 
 };
 
