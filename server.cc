@@ -17,7 +17,7 @@ bool Server::start(){
     int numClientes = 0;
    	 //contadores
     int i,j,k;
-	int recibidos;
+	ssize_t recibidos;
    	char identificador[MSG_SIZE];
     
     int on, ret;
@@ -113,18 +113,23 @@ bool Server::start(){
                                 numClientes++;
                                 FD_SET(new_sd,&readfds);
                             
-                                //strcpy(buffer, "Bienvenido al chat\n");
-                                buffer = "+Ok. Usuario conectado\n";
+                                strcpy(cbuffer, "+Ok. Usuario conectado\n");
+                                send(new_sd,cbuffer,sizeof(cbuffer),0);
+
+                                //buffer = "+Ok. Usuario conectado\n";
                                 for(j=0; j<(numClientes-1);j++){
-                                    send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
+                                    bzero(cbuffer,sizeof(cbuffer));
+                                    sprintf(cbuffer, "Nuevo Cliente conectado en <%d>",new_sd);
+                                    send(arrayClientes[j],cbuffer,sizeof(cbuffer),0);
                                 }
                             }
                             else
                             {
-                                //bzero(buffer,sizeof(buffer));
-                                buffer = "";
-                                buffer = "Demasiados clientes conectados\n";
-                                send(new_sd,buffer.c_str(),sizeof(buffer.c_str()),0);
+                                bzero(cbuffer,sizeof(cbuffer));
+                                //buffer = "";
+                                sprintf(cbuffer, "Demasiados clientes conectados\n");
+                                //cbuffer = "Demasiados clientes conectados\n";
+                                send(new_sd,cbuffer,sizeof(cbuffer),0);
                                 close(new_sd);
                             }
                             
@@ -136,9 +141,9 @@ bool Server::start(){
                     {
                         //Se ha introducido información de teclado
                         bzero(cbuffer, sizeof(cbuffer));
-                        buffer = "";
+                        //buffer = "";
                         fgets(cbuffer, sizeof(cbuffer),stdin);
-                        buffer.assign(cbuffer);
+                        //buffer.assign(cbuffer);
                         //Mensajes que se quieran mandar a los clientes (implementar)
                         
                     } 
@@ -147,11 +152,12 @@ bool Server::start(){
                         bzero(cbuffer,sizeof(cbuffer));
                         buffer = "";
                         recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
-                        buffer.assign(cbuffer);
+                        //buffer.assign(cbuffer);
                         std::string aux, login = "nan", password;
 
                         if(recibidos > 0)
                         {
+                            buffer.assign(cbuffer);
                             std::istringstream stream(buffer);
                             stream >> aux;
                             if(aux == "SALIR")
@@ -167,13 +173,13 @@ bool Server::start(){
                                 if(flag_user)
                                 {
                                     //usuario registrado
-                                    buffer = "+Ok. Usuario correcto\n   Escriba la contraseña: \n";
-                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    sprintf(cbuffer , "+Ok. Usuario correcto\n   Escriba la contraseña: \n");
+                                    send(i, cbuffer, sizeof(cbuffer), 0);
                                 }
                                 else
                                 {
-                                    buffer = "-Err. Usuario incorrecto\n";
-                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    sprintf(cbuffer, "-Err. Usuario incorrecto\n");
+                                    send(i, cbuffer, sizeof(cbuffer), 0);
                                 }
                             }
                             else if(aux == "PASSWORD")
@@ -181,8 +187,8 @@ bool Server::start(){
                                 stream >> password;
                                 if(login == "nan")
                                 {
-                                    buffer = "Hay que añadir el usuario\n";
-                                    send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    sprintf(cbuffer, "Hay que añadir el usuario\n");
+                                    send(i, cbuffer, sizeof(cbuffer), 0);
                                 }
                                 else
                                 {
@@ -190,14 +196,14 @@ bool Server::start(){
                                 
                                     if(flag_pass)
                                     {
-                                        buffer = "+Ok. Usuario validado\n";
+                                        sprintf(cbuffer,"+Ok. Usuario validado\n");
                                         pushbackValid(login);
-                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                        send(i, cbuffer, sizeof(cbuffer), 0);
                                     }
                                     else
                                     {
-                                        buffer = "-Err. Error en la validación\n";
-                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                        sprintf(cbuffer, "-Err. Error en la validación\n");
+                                        send(i, cbuffer, sizeof(cbuffer), 0);
                                     }
                                 }
                                 
@@ -208,14 +214,14 @@ bool Server::start(){
                                 stream >> aux;
                                 if(aux != "-u")
                                 {
-                                    buffer = "Error de formato\nEnviar REGISTRO -u usuario -p password\n";
+                                    sprintf(cbuffer, "Error de formato\nEnviar REGISTRO -u usuario -p password\n");
                                 }
                                 else
                                 {
                                     stream >> login;
                                     stream >> aux;
                                     if(aux != "-p"){
-                                        buffer = "Error de formato\nEnviar REGISTRO -u usuario -p password\n";
+                                        sprintf(cbuffer, "Error de formato\nEnviar REGISTRO -u usuario -p password\n");
                                     }
                                     else
                                     {
@@ -223,13 +229,13 @@ bool Server::start(){
 
                                         if(checkLogin(login))
                                         {
-                                            buffer = "Usuario ya registrado\n";
+                                            sprintf(cbuffer, "Usuario ya registrado\n");
                                         }
                                         else
                                         {
                                             addLogin(login, password);
                                             pushbackValid(login);
-                                            buffer = "Usuario validado\n";
+                                            sprintf(cbuffer, "Usuario validado\n");
                                             flag_singup = true;
                                         }
                                         
@@ -237,7 +243,7 @@ bool Server::start(){
                                         //flag_user = true;
                                     }
                                 }
-                                send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                send(i, cbuffer, sizeof(cbuffer), 0);
                             }
                             //else if()
                             //queda mas
