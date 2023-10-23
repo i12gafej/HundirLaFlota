@@ -77,7 +77,7 @@ bool Server::start(){
     FD_SET(sd,&readfds);
     FD_SET(0,&readfds);
     
-
+    bool flag_user = false, flag_pass = false, flag_singup = false, flag_init = false; 
     //Capturamos la señal SIGINT (Ctrl+c)
     signal(SIGINT,manejador);
     //SIEMPRE ESTA ESPERANDO COSAS
@@ -143,7 +143,7 @@ bool Server::start(){
                             buffer = "";
                             recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
                             buffer.assign(cbuffer);
-                            std::string aux;
+                            std::string aux, login, password;
                             if(recibidos > 0){
                                 std::istringstream stream(buffer);
                                 stream >> aux;
@@ -153,25 +153,66 @@ bool Server::start(){
                                     
                                 }
                                 else if(aux == "USUARIO"){
+                                    stream >> login;
+                                    flag_user = checkLogin(aux);
+                                    if(flag_user){
+                                        //usuario registrado
+                                        buffer = "+Ok. Usuario correcto\n   Escriba la contraseña: \n";
+                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    }else{
+                                        buffer = "–Err. Usuario incorrecto\n";
+                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    }
+                                }
+                                else if(aux == "PASSWORD"){
+                                    stream >> password;
+                                    flag_pass = checkPassword(login, password);
+                                    if(flag_pass && flag_user){
+                                        buffer = "+Ok. Usuario validado\n";
+                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    }
+                                    else{
+                                        buffer = "--Err. Error en la validación\n";
+                                        send(i, buffer.c_str(), sizeof(buffer.c_str()), 0);
+                                    }
+                                }
+                                else if(aux == "REGISTRO"){
                                     stream >> aux;
-                                    checkLogin(aux);
+                                    if(aux != "-u"){
+                                        buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                    }
+                                    else{
+                                        stream >> login;
+                                        stream >> aux;
+                                        if(aux != "-p"){
+                                            buffer = "Error de formato\nEnviar REGISTRO –u usuario –p password\n";
+                                        }
+                                        else{
+                                            stream >> password;
+                                            flag_singup = true;
+                                            //flag_pass = true;
+                                            //flag_user = true;
+                                        }
+                                    }
                                 }
-                                else{
-                                    
-                                    sprintf(identificador,"<%d>: %s",i,buffer);
-                                    //bzero(buffer,sizeof(buffer));
-                                    buffer = "";
-                                    //strcpy(buffer,identificador);
-                                    buffer.assign(identificador);
+                                
+                            }
+                            else{
+                                
+                                sprintf(identificador,"<%d>: %s",i,buffer);
+                                //bzero(buffer,sizeof(buffer));
+                                buffer = "";
+                                //strcpy(buffer,identificador);
+                                buffer.assign(identificador);
 
-                                    std::cout << buffer <<std::endl;
+                                std::cout << buffer <<std::endl;
 
-                                    for(j=0; j<numClientes; j++)
-                                        if(arrayClientes[j] != i)
-                                            send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
+                                for(j=0; j<numClientes; j++)
+                                    if(arrayClientes[j] != i)
+                                        send(arrayClientes[j],buffer.c_str(),sizeof(buffer.c_str()),0);
 
-                                    
-                                }
+                                
+                            }
                                                                 
                                 
                             }
@@ -228,14 +269,38 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
 
 }
 bool Server::checkLogin(std::string string){
-    std::vector<std::string> loginArray = getLogins();
+    std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
     for(int i = 0; i < loginArray.size(); i++){
-        if(string == loginArray[i]){
+        if(string == std::get<0>(loginArray[i])){
             return true;
         }
     }
     return false;
 }
-void setLoginArray(std::vector<std::string> array){
-    
+bool Server::checkPassword(std::string l, std::string p){
+    std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
+    for(int i = 0; i < loginArray.size(); i++){
+        if(l == std::get<0>(loginArray[i]) && p == std::get<1>(loginArray[i])){
+            return true;
+        }
+    }
+    return false;
+}
+void Server::setLoginArray(std::vector<std::tuple<std::string, std::string>> array){
+    std::ifstream f;
+    f.open("login.txt", std::ios::in);
+    if(f.is_open()){
+        std::string linea;
+        while(std::getline(f, linea)){
+            std::istringstream stream(linea);
+            std::string usuario, contrasena;
+            
+            stream >> usuario >> contrasena;
+            addLogin(usuario, contrasena);
+        }
+        f.close();
+    }
+    else{
+        std::cerr << "No se pudo abrir el archivo \"login.txt\"." << std::endl;
+    }
 }
