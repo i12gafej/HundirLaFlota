@@ -30,25 +30,7 @@ char * tratarString(char * buffer){
     sub[length] = '\0';
     return sub;
 }
-void tratarRegistro(char * buffer, char **nombre, char **contra){
-    char *posU = strstr(buffer, "-u"); 
-    char *posP = strstr(buffer, "-p");
-    if (posU != NULL && posP != NULL) {
-        *nombre = posU + 3;
-        char *finUsuario = strchr(*nombre, ' ');
-        if (finUsuario != NULL) {
-            *finUsuario = '\0'; 
-        }
-        *contra = posP + 3;
-        char *finContrasena = strchr(*contra, ' ');
-        if (finContrasena != NULL) {
-            *finContrasena = '\0';
-        }
-    } else {
-        strcpy(nombre, "errorf");
-        *contra = NULL;
-    }
-}
+
 
 int main ( )
 {
@@ -209,7 +191,7 @@ int main ( )
                         } 
                         else{
                             bzero(buffer,sizeof(buffer));
-                            char * usuario, contra;
+                            char *usuario, *contra;
                             
                             recibidos = recv(i,buffer,sizeof(buffer),0);
                             
@@ -220,32 +202,49 @@ int main ( )
                                     salirCliente(i,&readfds,&numClientes,arrayClientes);
                                     
                                 }
-                                else if(strncmp(buffer, "USUARIO", 7) == 0){
-                                    // char *pos = strchr(buffer, ' ');
-                                    // size_t length = strlen(pos + 1);
-                                    // char sub[length+1];
-                                    // strncpy(sub, pos + 1, length);
-                                    // sub[length] = '\0';
-                                    usuario = tratarString(buffer);
+                                else if(strncmp(buffer, "USUARIO", 7) == 0){                                    
+                                    usuario = (char *)tratarString(buffer);
 
                                     bzero(buffer,sizeof(buffer));
                                     sprintf(buffer, "+Ok. Usuario correcto %s", usuario);
                                     send(i,buffer,sizeof(buffer),0);
                                 }
                                 else if(strncmp(buffer, "PASSWORD", 8) == 0){
-                                    contra = tratarString(buffer);
+                                    contra = (char *)tratarString(buffer);
 
                                     bzero(buffer,sizeof(buffer));
                                     sprintf(buffer, "+Ok. Usuario valido %s", usuario);
                                     send(i,buffer,sizeof(buffer),0);
                                 }
                                 else if(strncmp(buffer, "REGISTRO", 8) == 0){
-                                    tratarRegistro(buffer, usuario, contra);
+                                    buffer[strlen(buffer)-1] = '\0';
+                                    char *posU = strstr(buffer, "-u"); 
+                                    char *posP = strstr(buffer, "-p");
+                                    char auxi[20];
+                                    if (posU != NULL && posP != NULL) {
+                                        char *aux = posU + 3; //nombre -p contra
+                                        char *finU = strchr(aux, ' ');//-p contra
+                                        size_t oU = strlen(aux)-strlen(finU);//length(user)
+                                        if(finU != NULL){
+                                            //printf("Si");
+                                            strncpy(auxi, aux, oU);
+                                        }
+                                        
+                                        else{
+                                            strcpy(auxi,"errorf");
+                                        }
+                                        contra = posP + 3;
+                                        usuario = auxi;
+                                    }
                                     bzero(buffer,sizeof(buffer));
-                                    if(strcmp(usuario, "errorf") == 0)
+                                    if(strcmp(usuario, "errorf") == 0){
                                         sprintf(buffer, "-Err. Error de formato");
-                                    else
-                                        sprintf(buffer, "+Ok. Usuario registrado %s , %s", usuario , contra);
+                                    }
+                                    else{
+                                        sprintf(buffer, "+Ok. Usuario registrado");
+                                    }
+                                    send(i,buffer,sizeof(buffer),0);
+
                                 }
                                 else{
                                     
