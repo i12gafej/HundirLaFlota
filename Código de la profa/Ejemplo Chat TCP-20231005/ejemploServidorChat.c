@@ -22,7 +22,33 @@
 void manejador(int signum);
 void salirCliente(int socket, fd_set * readfds, int * numClientes, int arrayClientes[]);
 
-
+char * tratarString(char * buffer){
+    char *pos = strchr(buffer, ' ');
+    size_t length = strlen(pos + 1);
+    char *sub = (char *)malloc(length + 1);
+    strncpy(sub, pos + 1, length);
+    sub[length] = '\0';
+    return sub;
+}
+void tratarRegistro(char * buffer, char **nombre, char **contra){
+    char *posU = strstr(buffer, "-u"); 
+    char *posP = strstr(buffer, "-p");
+    if (posU != NULL && posP != NULL) {
+        *nombre = posU + 3;
+        char *finUsuario = strchr(*nombre, ' ');
+        if (finUsuario != NULL) {
+            *finUsuario = '\0'; 
+        }
+        *contra = posP + 3;
+        char *finContrasena = strchr(*contra, ' ');
+        if (finContrasena != NULL) {
+            *finContrasena = '\0';
+        }
+    } else {
+        strcpy(nombre, "errorf");
+        *contra = NULL;
+    }
+}
 
 int main ( )
 {
@@ -135,7 +161,7 @@ int main ( )
                                     numClientes++;
                                     FD_SET(new_sd,&readfds);
                                 
-                                    strcpy(buffer, "Bienvenido al chat\n");
+                                    strcpy(buffer, "Bienvenido HUNDIR LA FLOTA\n");
                                 
                                     send(new_sd,buffer,sizeof(buffer),0);
                                 
@@ -183,6 +209,7 @@ int main ( )
                         } 
                         else{
                             bzero(buffer,sizeof(buffer));
+                            char * usuario, contra;
                             
                             recibidos = recv(i,buffer,sizeof(buffer),0);
                             
@@ -192,6 +219,33 @@ int main ( )
                                     
                                     salirCliente(i,&readfds,&numClientes,arrayClientes);
                                     
+                                }
+                                else if(strncmp(buffer, "USUARIO", 7) == 0){
+                                    // char *pos = strchr(buffer, ' ');
+                                    // size_t length = strlen(pos + 1);
+                                    // char sub[length+1];
+                                    // strncpy(sub, pos + 1, length);
+                                    // sub[length] = '\0';
+                                    usuario = tratarString(buffer);
+
+                                    bzero(buffer,sizeof(buffer));
+                                    sprintf(buffer, "+Ok. Usuario correcto %s", usuario);
+                                    send(i,buffer,sizeof(buffer),0);
+                                }
+                                else if(strncmp(buffer, "PASSWORD", 8) == 0){
+                                    contra = tratarString(buffer);
+
+                                    bzero(buffer,sizeof(buffer));
+                                    sprintf(buffer, "+Ok. Usuario valido %s", usuario);
+                                    send(i,buffer,sizeof(buffer),0);
+                                }
+                                else if(strncmp(buffer, "REGISTRO", 8) == 0){
+                                    tratarRegistro(buffer, usuario, contra);
+                                    bzero(buffer,sizeof(buffer));
+                                    if(strcmp(usuario, "errorf") == 0)
+                                        sprintf(buffer, "-Err. Error de formato");
+                                    else
+                                        sprintf(buffer, "+Ok. Usuario registrado %s , %s", usuario , contra);
                                 }
                                 else{
                                     
