@@ -22,6 +22,8 @@ bool Server::start(){
     
     int on, ret;
 
+    setLoginArray();
+
     
     
 	/* --------------------------------------------------
@@ -150,8 +152,8 @@ bool Server::start(){
                             if(strcmp(buffer,"SALIR\n") == 0){
                              
                                 for (j = 0; j < numClientes; j++){
-						   bzero(buffer, sizeof(buffer));
-						   strcpy(buffer,"Desconexión servidor\n"); 
+                                    bzero(buffer, sizeof(buffer));
+                                    strcpy(buffer,"Desconexión servidor\n"); 
                                     send(arrayClientes[j],buffer , sizeof(buffer),0);
                                     close(arrayClientes[j]);
                                     FD_CLR(arrayClientes[j],&readfds);
@@ -160,6 +162,12 @@ bool Server::start(){
                                     exit(-1);
                                 
                                 
+                            }
+                            else if(strcmp(buffer,"LOGIN\n") == 0){
+                                auto llll = getLogins();
+                                for(int log = 0; log < llll.size(); log++){
+                                    std::cout << std::get<0>(llll[log]) << " "<< std::get<0>(llll[log])<<std::endl;
+                                }
                             }
                     } 
                     else
@@ -186,17 +194,18 @@ bool Server::start(){
                                 usuario = (char *)tratarString(buffer);
 
                                 login.assign(usuario);
+                                std::cout << login << std::endl;
                                 flag_user = checkLogin(login);
 
                                 if(flag_user)
                                 {
                                     //usuario registrado
-                                    sprintf(buffer , "+Ok. Usuario correcto");
+                                    sprintf(buffer , "+Ok. Usuario correcto\n");
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
                                 else
                                 {
-                                    sprintf(buffer, "-Err. Usuario incorrecto");
+                                    sprintf(buffer, "-Err. Usuario incorrecto\n");
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
                             }
@@ -205,7 +214,7 @@ bool Server::start(){
                                 contra = (char *)tratarString(buffer);
                                 if(login == "nan")
                                 {
-                                    sprintf(buffer, "Hay que añadir el usuario");
+                                    sprintf(buffer, "Hay que añadir el usuario\n");
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
                                 else
@@ -215,13 +224,13 @@ bool Server::start(){
                                 
                                     if(flag_pass)
                                     {
-                                        sprintf(buffer,"+Ok. Usuario validado");
+                                        sprintf(buffer,"+Ok. Usuario validado\n");
                                         pushbackValid(login);
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else
                                     {
-                                        sprintf(buffer, "-Err. Error en la validación");
+                                        sprintf(buffer, "-Err. Error en la validación\n");
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                 }
@@ -232,7 +241,7 @@ bool Server::start(){
                             {
                                 //stream >> aux;
                                 
-                                buffer[strlen(buffer)-1] = '\0';
+                                
                                 char *posU = strstr(buffer, "-u"); 
                                 char *posP = strstr(buffer, "-p");
                                 char auxi[20];
@@ -249,15 +258,18 @@ bool Server::start(){
                                         strcpy(auxi,"errorf");
                                     }
                                     contra = posP + 3;
+                                    contra[strlen(contra)-1] = '\0';
                                     usuario = auxi;
                                 }   
+                                
                                 if(strcmp(usuario, "errorf") == 0){
-                                    sprintf(buffer, "-Err. Error de formato");
+                                    bzero(buffer, sizeof(buffer));
+                                    sprintf(buffer, "-Err. Error de formato\n");
                                 }
                                 if(checkLogin(login))
                                 {
-
-                                    sprintf(buffer, "-Err. Usuario ya registrado");
+                                    bzero(buffer, sizeof(buffer));
+                                    sprintf(buffer, "-Err. Usuario ya registrado\n");
 
                                 }
                                 else
@@ -265,8 +277,11 @@ bool Server::start(){
                                     addLogin(login, password);
                                     pushbackValid(login);
 
-                                    sprintf(buffer, "+Ok. Usuario validado");
-
+                                    bzero(buffer, MSG_SIZE);
+                                    sprintf(buffer, "+Ok. Usuario validado\n");
+                                    
+                                    
+                                    printLoginArray();
 
                                     flag_singup = true;
                                 }
@@ -354,8 +369,9 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
 }
 bool Server::checkLogin(std::string string){
     std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
-    for(int i = 0; i < loginArray.size(); i++){
-        if(string == std::get<0>(loginArray[i])){
+    std::vector<std::tuple<std::string, std::string>> ::iterator it;
+    for(it = loginArray.begin(); it != loginArray.end(); *it++){
+        if(string == std::get<0>(*it)){
             return true;
         }
     }
@@ -370,7 +386,7 @@ bool Server::checkPassword(std::string l, std::string p){
     }
     return false;
 }
-void Server::setLoginArray(std::vector<std::tuple<std::string, std::string>> array){
+void Server::setLoginArray(){
     std::ifstream f;
     f.open("login.txt", std::ios::in);
     if(f.is_open()){
@@ -380,6 +396,7 @@ void Server::setLoginArray(std::vector<std::tuple<std::string, std::string>> arr
             std::string usuario, contrasena;
             
             stream >> usuario >> contrasena;
+            //std::cout << "Usuario: "<< usuario <<" contraseña: "<<contrasena<<std::endl;
             addLogin(usuario, contrasena);
         }
         f.close();
@@ -398,6 +415,21 @@ bool Server::addValid(std::string login){
     pushbackValid(login);
     return true;
 
+}
+void Server::printLoginArray(){
+    auto v = getLogins();
+    std::ofstream f;
+    f.open("login.txt", std::ios::out);
+    if(f.is_open()){
+        std::string linea;
+        for(int i = 0; i < v.size(); i++){            
+            f << std::get<0>(v[i]) << " " << std::get<1>(v[i]) << std::endl;
+        }
+        f.close();
+    }
+    else{
+        std::cerr << "No se pudo abrir el archivo \"login.txt\"." << std::endl;
+    }
 }
 char * tratarString(char * buffer){
     char *pos = strchr(buffer, ' ');

@@ -42,10 +42,16 @@ class Server{
     //get
     inline std::vector<std::tuple<std::string, std::string>> getLogins(){return this->logins;};
     inline std::vector<std::string> getValid(){return this->validados;};
+        
+    
     //set
-        //sets the array form the I/O file
-    void setLoginArray(std::vector<std::tuple<std::string, std::string>> array);
     inline void pushbackValid(std::string string){this->validados.push_back(string);};
+        //sets the array form the I/O file
+    void setLoginArray();
+    
+    //print 
+        //prints the array to the I/O file
+    void printLoginArray();
     //method
     inline void addLogin(std::string login, std::string password){this->logins.push_back(std::tuple<std::string, std::string>(login, password));};
     bool addValid(std::string login); // devuelve salfo si a quien añades ya está validado
