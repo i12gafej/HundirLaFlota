@@ -8,8 +8,8 @@
 bool Server::start(){
     int sd, new_sd;
 	struct sockaddr_in sockname, from;
-	char cbuffer[MSG_SIZE];
-    std::string buffer;
+	char buffer[MSG_SIZE];
+    std::string sbuffer;
 	socklen_t from_len;
     fd_set readfds, auxfds;
    	int salida;
@@ -116,23 +116,23 @@ bool Server::start(){
                                 numClientes++;
                                 FD_SET(new_sd,&readfds);
                             
-                                strcpy(cbuffer, "+Ok. Usuario conectado\n");
-                                send(new_sd,cbuffer,sizeof(cbuffer),0);
+                                strcpy(buffer, "+Ok. Usuario conectado\n");
+                                send(new_sd,buffer,sizeof(buffer),0);
 
                                 //buffer = "+Ok. Usuario conectado\n";
                                 for(j=0; j<(numClientes-1);j++){
-                                    bzero(cbuffer,sizeof(cbuffer));
-                                    sprintf(cbuffer, "Nuevo Cliente conectado en <%d>",new_sd);
-                                    send(arrayClientes[j],cbuffer,sizeof(cbuffer),0);
+                                    bzero(buffer,sizeof(buffer));
+                                    sprintf(buffer, "Nuevo Cliente conectado en <%d>",new_sd);
+                                    send(arrayClientes[j],buffer,sizeof(buffer),0);
                                 }
                             }
                             else
                             {
-                                bzero(cbuffer,sizeof(cbuffer));
+                                bzero(buffer,sizeof(buffer));
                                 //buffer = "";
-                                sprintf(cbuffer, "Demasiados clientes conectados\n");
-                                //cbuffer = "Demasiados clientes conectados\n";
-                                send(new_sd,cbuffer,sizeof(cbuffer),0);
+                                sprintf(buffer, "Demasiados clientes conectados\n");
+                                //buffer = "Demasiados clientes conectados\n";
+                                send(new_sd,buffer,sizeof(buffer),0);
                                 close(new_sd);
                             }
                             
@@ -143,109 +143,133 @@ bool Server::start(){
                     else if (i == 0)
                     {
                         //Se ha introducido información de teclado
-                        bzero(cbuffer, sizeof(cbuffer));
-                        //buffer = "";
-                        fgets(cbuffer, sizeof(cbuffer),stdin);
-                        //buffer.assign(cbuffer);
-                        //Mensajes que se quieran mandar a los clientes (implementar)
-                        
+                            bzero(buffer, sizeof(buffer));
+                            fgets(buffer, sizeof(buffer),stdin);
+                            
+                            //Controlar si se ha introducido "SALIR", cerrando todos los sockets y finalmente saliendo del servidor. (implementar)
+                            if(strcmp(buffer,"SALIR\n") == 0){
+                             
+                                for (j = 0; j < numClientes; j++){
+						   bzero(buffer, sizeof(buffer));
+						   strcpy(buffer,"Desconexión servidor\n"); 
+                                    send(arrayClientes[j],buffer , sizeof(buffer),0);
+                                    close(arrayClientes[j]);
+                                    FD_CLR(arrayClientes[j],&readfds);
+                                }
+                                    close(sd);
+                                    exit(-1);
+                                
+                                
+                            }
                     } 
                     else
                     {
-                        bzero(cbuffer,sizeof(cbuffer));
-                        buffer = "";
-                        recibidos = recv(i,cbuffer,sizeof(cbuffer),0);
-                        //buffer.assign(cbuffer);
+                        bzero(buffer,sizeof(buffer));
+                        char *usuario, *contra;
+                        sbuffer = "";
+                        recibidos = recv(i,buffer,sizeof(buffer),0);
+                        sbuffer.assign(buffer);
                         std::string aux, login = "nan", password;
+                        //std::istringstream stream(sbuffer);
 
                         if(recibidos > 0)
                         {
-                            buffer.assign(cbuffer);
-                            std::istringstream stream(buffer);
-                            stream >> aux;
-                            if(aux == "SALIR")
+                            
+                            
+                            if(strcmp(buffer,"SALIR\n") == 0)
                             {   
                                 printf("El socket %d ha abandonado el servidor\n", i);
                                 close_client(i,&readfds,&numClientes,arrayClientes);   
                             }
-                            else if(aux == "USUARIO")
+                            else if(strncmp(buffer, "USUARIO", 7) == 0)
                             {
-                                stream >> login;
-                                flag_user = checkLogin(aux);
+                                usuario = (char *)tratarString(buffer);
+
+                                login.assign(usuario);
+                                flag_user = checkLogin(login);
 
                                 if(flag_user)
                                 {
                                     //usuario registrado
-                                    sprintf(cbuffer , "+Ok. Usuario correcto\n   Escriba la contraseña: \n");
-                                    send(i, cbuffer, sizeof(cbuffer), 0);
+                                    sprintf(buffer , "+Ok. Usuario correcto");
+                                    send(i, buffer, sizeof(buffer), 0);
                                 }
                                 else
                                 {
-                                    sprintf(cbuffer, "-Err. Usuario incorrecto\n");
-                                    send(i, cbuffer, sizeof(cbuffer), 0);
+                                    sprintf(buffer, "-Err. Usuario incorrecto");
+                                    send(i, buffer, sizeof(buffer), 0);
                                 }
                             }
-                            else if(aux == "PASSWORD")
+                            else if(strncmp(buffer, "PASSWORD", 8) == 0)
                             {
-                                stream >> password;
+                                contra = (char *)tratarString(buffer);
                                 if(login == "nan")
                                 {
-                                    sprintf(cbuffer, "Hay que añadir el usuario\n");
-                                    send(i, cbuffer, sizeof(cbuffer), 0);
+                                    sprintf(buffer, "Hay que añadir el usuario");
+                                    send(i, buffer, sizeof(buffer), 0);
                                 }
                                 else
                                 {
+                                    password.assign(contra);
                                     flag_pass = checkPassword(login, password);
                                 
                                     if(flag_pass)
                                     {
-                                        sprintf(cbuffer,"+Ok. Usuario validado\n");
+                                        sprintf(buffer,"+Ok. Usuario validado\n");
                                         pushbackValid(login);
-                                        send(i, cbuffer, sizeof(cbuffer), 0);
+                                        send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else
                                     {
-                                        sprintf(cbuffer, "-Err. Error en la validación\n");
-                                        send(i, cbuffer, sizeof(cbuffer), 0);
+                                        sprintf(buffer, "-Err. Error en la validación\n");
+                                        send(i, buffer, sizeof(buffer), 0);
                                     }
                                 }
                                 
                                 
                             }
-                            else if(aux == "REGISTRO")
+                            else if(strncmp(buffer, "REGISTRO", 8) == 0)
                             {
-                                stream >> aux;
-                                if(aux != "-u")
+                                //stream >> aux;
+                                
+                                buffer[strlen(buffer)-1] = '\0';
+                                char *posU = strstr(buffer, "-u"); 
+                                char *posP = strstr(buffer, "-p");
+                                char auxi[20];
+                                if (posU != NULL && posP != NULL) {
+                                    char *aux = posU + 3; //nombre -p contra
+                                    char *finU = strchr(aux, ' ');//< -p contra>
+                                    size_t oU = strlen(aux)-strlen(finU);//length(user)
+                                    if(finU != NULL){
+                                        //printf("Si");
+                                        strncpy(auxi, aux, oU);
+                                    }
+                                    
+                                    else{
+                                        strcpy(auxi,"errorf");
+                                    }
+                                    contra = posP + 3;
+                                    usuario = auxi;
+                                }   
+                                if(strcmp(usuario, "errorf") == 0){
+                                    sprintf(buffer, "-Err. Error de formato");
+                                }
+                                if(checkLogin(login))
                                 {
-                                    sprintf(cbuffer, "Error de formato\nEnviar REGISTRO -u usuario -p password\n");
+                                    sprintf(cbuffer, "Usuario ya registrado\n");
                                 }
                                 else
                                 {
-                                    stream >> login;
-                                    stream >> aux;
-                                    if(aux != "-p"){
-                                        sprintf(cbuffer, "Error de formato\nEnviar REGISTRO -u usuario -p password\n");
-                                    }
-                                    else
-                                    {
-                                        stream >> password;
-
-                                        if(checkLogin(login))
-                                        {
-                                            sprintf(cbuffer, "Usuario ya registrado\n");
-                                        }
-                                        else
-                                        {
-                                            addLogin(login, password);
-                                            pushbackValid(login);
-                                            sprintf(cbuffer, "Usuario validado\n");
-                                            flag_singup = true;
-                                        }
-                                        
-                                        //flag_pass = true;
-                                        //flag_user = true;
-                                    }
+                                    addLogin(login, password);
+                                    pushbackValid(login);
+                                    sprintf(cbuffer, "Usuario validado\n");
+                                    flag_singup = true;
                                 }
+                                
+                                //flag_pass = true;
+                                //flag_user = true;
+                                    
+                                
                                 send(i, cbuffer, sizeof(cbuffer), 0);
                             }
                             else if(aux == "INICIAR-PARTIDA"){
@@ -369,4 +393,12 @@ bool Server::addValid(std::string login){
     pushbackValid(login);
     return true;
 
+}
+char * tratarString(char * buffer){
+    char *pos = strchr(buffer, ' ');
+    size_t length = strlen(pos + 1);
+    char *sub = (char *)malloc(length + 1);
+    strncpy(sub, pos + 1, length);
+    sub[length] = '\0';
+    return sub;
 }

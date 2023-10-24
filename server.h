@@ -54,5 +54,6 @@ class Server{
 
 };
 void manejador (int signum);
+char * tratarString(char * buffer);
 
 #endif
