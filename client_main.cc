@@ -77,10 +77,14 @@ int main(){
 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
+<<<<<<< HEAD
                 printf("foo\n");
                 buffer[strlen(buffer)-1] = '\0';
+=======
+                //buffer[strlen(buffer)-1] = '\0';
+>>>>>>> refs/remotes/origin/main
 
-                if(strcmp(buffer, "SALIR")){
+                if(strcmp(buffer, "SALIR\n")){
                     disconnect = true;
                 }
                 else
