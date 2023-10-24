@@ -20,8 +20,9 @@ int main ( )
 	struct sockaddr_in sockname;
 	char buffer[250];
 	socklen_t len_sockname;
-    	fd_set readfds, auxfds;
-    	int salida;
+    
+	fd_set readfds, auxfds;
+    int salida;
     	int fin = 0;
 	
     

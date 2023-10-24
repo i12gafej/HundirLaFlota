@@ -80,16 +80,9 @@ int main(){
 
                 if(strcmp(buffer, "SALIR\n") == 0){
                     disconnect = true;
-<<<<<<< HEAD
-
-                }else{
-                    
-
-=======
                 }
                 else
                 {
->>>>>>> refs/remotes/origin/main
                     if(send(sd, buffer, sizeof(buffer), 0) == -1) {
             	    printf("Error al enviar el mensaje\n%d: %s\n", errno, strerror(errno));
        	    	    exit(EXIT_FAILURE);
