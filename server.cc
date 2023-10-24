@@ -215,13 +215,13 @@ bool Server::start(){
                                 
                                     if(flag_pass)
                                     {
-                                        sprintf(buffer,"+Ok. Usuario validado\n");
+                                        sprintf(buffer,"+Ok. Usuario validado");
                                         pushbackValid(login);
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else
                                     {
-                                        sprintf(buffer, "-Err. Error en la validación\n");
+                                        sprintf(buffer, "-Err. Error en la validación");
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                 }
@@ -256,21 +256,16 @@ bool Server::start(){
                                 }
                                 if(checkLogin(login))
                                 {
-<<<<<<< HEAD
-                                    sprintf(buffer, "-Err. Usuario ya registrado\n");
-=======
-                                    sprintf(buffer, "Usuario ya registrado\n");
->>>>>>> refs/remotes/origin/main
+
+                                    sprintf(buffer, "-Err. Usuario ya registrado");
                                 }
                                 else
                                 {
                                     addLogin(login, password);
                                     pushbackValid(login);
-<<<<<<< HEAD
-                                    sprintf(buffer, "+Ok. Usuario validado\n");
-=======
-                                    sprintf(buffer, "Usuario validado\n");
->>>>>>> refs/remotes/origin/main
+
+                                    sprintf(buffer, "+Ok. Usuario validado");
+
                                     flag_singup = true;
                                 }
                                 
