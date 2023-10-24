@@ -256,13 +256,13 @@ bool Server::start(){
                                 }
                                 if(checkLogin(login))
                                 {
-                                    sprintf(cbuffer, "Usuario ya registrado\n");
+                                    sprintf(buffer, "Usuario ya registrado\n");
                                 }
                                 else
                                 {
                                     addLogin(login, password);
                                     pushbackValid(login);
-                                    sprintf(cbuffer, "Usuario validado\n");
+                                    sprintf(buffer, "Usuario validado\n");
                                     flag_singup = true;
                                 }
                                 
@@ -270,7 +270,7 @@ bool Server::start(){
                                 //flag_user = true;
                                     
                                 
-                                send(i, cbuffer, sizeof(cbuffer), 0);
+                                send(i, buffer, sizeof(buffer), 0);
                             }
                             else if(aux == "INICIAR-PARTIDA"){
                                 /*PASOS:
