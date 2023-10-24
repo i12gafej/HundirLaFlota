@@ -256,21 +256,13 @@ bool Server::start(){
                                 }
                                 if(checkLogin(login))
                                 {
-<<<<<<< HEAD
-                                    sprintf(buffer, "-Err. Usuario ya registrado\n");
-=======
                                     sprintf(buffer, "Usuario ya registrado\n");
->>>>>>> refs/remotes/origin/main
                                 }
                                 else
                                 {
                                     addLogin(login, password);
                                     pushbackValid(login);
-<<<<<<< HEAD
-                                    sprintf(buffer, "+Ok. Usuario validado\n");
-=======
                                     sprintf(buffer, "Usuario validado\n");
->>>>>>> refs/remotes/origin/main
                                     flag_singup = true;
                                 }
                                 
