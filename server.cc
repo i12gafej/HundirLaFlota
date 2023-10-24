@@ -258,6 +258,7 @@ bool Server::start(){
                                 {
 
                                     sprintf(buffer, "-Err. Usuario ya registrado");
+
                                 }
                                 else
                                 {
@@ -265,6 +266,7 @@ bool Server::start(){
                                     pushbackValid(login);
 
                                     sprintf(buffer, "+Ok. Usuario validado");
+
 
                                     flag_singup = true;
                                 }

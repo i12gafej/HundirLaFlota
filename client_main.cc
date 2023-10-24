@@ -55,13 +55,14 @@ int main(){
             exit(EXIT_FAILURE);
         }
 
-        if(FD_ISSET(sd, &auxfds)){                                  //server response
+        if(FD_ISSET(sd, &auxfds))   //server response
+        {
             bzero(buffer, sizeof(buffer));
             if (recv(sd, buffer, sizeof(buffer), 0) == -1) {
         		printf("ERROR al recibir respuesta\n%d: %s\n", errno, strerror(errno));
         		exit(EXIT_FAILURE);
     		}
-            //std::cout << "HOLAA" <<std::endl;
+            
             printf("%s", buffer);
 
             if(strcmp(buffer, "-Err. Demasiados clientes conectados") == 0){
@@ -77,7 +78,6 @@ int main(){
                 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
-                //buffer[strlen(buffer)-1] = '\0';
 
                 if(strcmp(buffer, "SALIR\n") == 0){
                     disconnect = true;
