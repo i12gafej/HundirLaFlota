@@ -72,7 +72,8 @@ int main(){
             }
             
         }else{
-            if(FD_ISSET(0, &auxfds)){           //its client turn to talk to the server
+
+            if(FD_ISSET(0, &auxfds)){           //it's client turn to talk to the server
                 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
@@ -88,13 +89,9 @@ int main(){
        	    	    exit(EXIT_FAILURE);
    		            }
                 }
-
             }
         }
             
     }while(!disconnect);
     
-
-
-
 }
