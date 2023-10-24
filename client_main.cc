@@ -77,13 +77,14 @@ int main(){
 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
+                printf("foo\n");
                 buffer[strlen(buffer)-1] = '\0';
 
                 if(strcmp(buffer, "SALIR")){
                     disconnect = true;
-
-                }else{
-
+                }
+                else
+                {
                     if(send(sd, buffer, sizeof(buffer), 0) == -1) {
             	    printf("Error al enviar el mensaje\n%d: %s\n", errno, strerror(errno));
        	    	    exit(EXIT_FAILURE);
