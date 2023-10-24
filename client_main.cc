@@ -61,7 +61,7 @@ int main(){
         		printf("ERROR al recibir respuesta\n%d: %s\n", errno, strerror(errno));
         		exit(EXIT_FAILURE);
     		}
-
+            //std::cout << "HOLAA" <<std::endl;
             printf("%s", buffer);
 
             if(strcmp(buffer, "-Err. Demasiados clientes conectados")){
@@ -74,7 +74,7 @@ int main(){
         }else{
 
             if(FD_ISSET(0, &auxfds)){           //its client turn to talk to the server
-
+                
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
                 //buffer[strlen(buffer)-1] = '\0';
@@ -83,6 +83,7 @@ int main(){
                     disconnect = true;
 
                 }else{
+                    
 
                     if(send(sd, buffer, sizeof(buffer), 0) == -1) {
             	    printf("Error al enviar el mensaje\n%d: %s\n", errno, strerror(errno));
