@@ -220,7 +220,7 @@ bool Player::out_of_limits(int x, int y){
     }
 }
 
-void Player::print_allowed_messages(){
+/*void Player::print_allowed_messages(){
     std::cout << "Los mensajes permitidos son:\n"
         "USUARIO <username>: se pide el registro con ese usuario\n"
         "PASSWORD <password>: se introduce la contraseña para el usuario anterior\n"
@@ -229,7 +229,7 @@ void Player::print_allowed_messages(){
         "INICIAR-PARTIDA: se le pide al servidor entrar en partida\n"
         "DISPARO <letra>,<numero>: en una partida, se dispara a esas coordenadas\n"
         "SALIR: se desconecta del servidor\n";
-}
+}*/
 
 
 void Player::set_position(int x, int y, char state){

@@ -31,11 +31,12 @@ bool Game::start(){
         fd_set readfs;
         FD_ZERO(&readfs);
 
+        /*EL WHILE EN CUESTIÓN DE ABAJO EMPIEZA AQUÍ*/
         bzero(buff, sizeof(buff));
         if(turn_player1_){
             FD_SET(player1_.get_socket(), &readfs);
 
-            /*FALTA EL SELECT!!!!!*/
+            select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
 
             if(FD_ISSET(player1_.get_socket(), &readfs))
             {
@@ -43,10 +44,10 @@ bool Game::start(){
                     printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
                     exit(EXIT_FAILURE);
                 }
-                player1_.shoot();
             }else{
                 printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
             }
+            player1_.shoot();
         }
         else
         {
@@ -57,13 +58,21 @@ bool Game::start(){
                     printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
                     exit(EXIT_FAILURE);
                 }
-                player2_.shoot();
             }else{
                 printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
             }
+            player2_.shoot();
         }
 
-        /*Tratamiento de la cadena enviada*/
+        
+
+        /*TRATAMIENTO DE LA CADENA ENVIADA:
+            Entrar en un bucle while (que englobará a toda la recepción de cosas de arriba)
+        y que la condición de salida sea que la cadena empiece por ATAQUE (se le debe
+        indicar al cliente que la orden es incorrecta)
+            NOTA:es cuando se sale del bucle cuando se aumenta la cuenta de disparos,
+        se intentará no volver a poner más ifs*/
+
         game_response = attack(turn_player1_, x, y);
 
         if(turn_player1_){
@@ -80,6 +89,8 @@ bool Game::start(){
             }
         }
 
+        player1_.print_board();
+        player2_.print_board();
         this->set_has_ended(ckeck_game_ended(turn_player1_));
 
     }while(!this->has_ended());
