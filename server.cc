@@ -4,10 +4,6 @@
 #include "server.h"
 #include <errno.h>
 
-/*  Este mutex va a ser el que va a controlar que el juego no esté constantemente dando
-vueltas en con el mismo ataque una y otra vez.*/
-std::mutex query_mutex;
-
 
 bool Server::start(){
     int sd, new_sd;

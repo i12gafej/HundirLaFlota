@@ -9,7 +9,7 @@ int main(){
 
     int sd;
 	struct sockaddr_in sockname;
-	char buffer[100];
+	char buffer[200];
 	socklen_t len_sockname;
 	bool disconnect = false;
 
@@ -36,7 +36,7 @@ int main(){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Conectado al servidor.\n");
+	printf("Conectado al servidor: %d.\n", sd);
 
 
     //Initialization of socket structs
@@ -55,7 +55,7 @@ int main(){
             exit(EXIT_FAILURE);
         }
 
-        if(FD_ISSET(sd, &auxfds)){              //server response
+        if(FD_ISSET(sd, &auxfds)){                                  //server response
             bzero(buffer, sizeof(buffer));
             if (recv(sd, buffer, sizeof(buffer), 0) == -1) {
         		printf("ERROR al recibir respuesta\n%d: %s\n", errno, strerror(errno));
@@ -64,27 +64,32 @@ int main(){
             //std::cout << "HOLAA" <<std::endl;
             printf("%s", buffer);
 
-            if(strcmp(buffer, "-Err. Demasiados clientes conectados")){
+            if(strcmp(buffer, "-Err. Demasiados clientes conectados") == 0){
                 disconnect = true;
             }
-            if(strcmp(buffer, "+Ok. Desconexion servidor")){
+            else if(strcmp(buffer, "+Ok. Desconexion servidor") == 0){
                 disconnect = true;
             }
-        
+            
         }else{
-
             if(FD_ISSET(0, &auxfds)){           //its client turn to talk to the server
                 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
                 //buffer[strlen(buffer)-1] = '\0';
 
-                if(strcmp(buffer, "SALIR\n")){
+                if(strcmp(buffer, "SALIR\n") == 0){
                     disconnect = true;
+<<<<<<< HEAD
 
                 }else{
                     
 
+=======
+                }
+                else
+                {
+>>>>>>> refs/remotes/origin/main
                     if(send(sd, buffer, sizeof(buffer), 0) == -1) {
             	    printf("Error al enviar el mensaje\n%d: %s\n", errno, strerror(errno));
        	    	    exit(EXIT_FAILURE);
@@ -93,38 +98,6 @@ int main(){
 
             }
         }
-            /*SERVER FUNCTIONALITIES, MAY COME HANDY WHEN IMPLEMENTING THE SERVER
-            
-            std::vector<std::string> placeholder = split(buffer, ' ');
-            std::string username = placeholder[1];
-
-            bzero(buffer, sizeof(buffer));
-   		    if (recv(sd, buffer, sizeof(buffer), 0) == -1) {
-        		std::cout << "Error al recibir la respuesta\n";
-        		exit(EXIT_FAILURE);
-    		}
-
-            fgets(buffer, sizeof(buffer), stdin);
-            buffer[strlen(buffer)-1] = '\0';
-
-            if(send(sd, buffer, sizeof(buffer), 0) == -1) {
-            	std::cout << "Error al enviar el mensaje\n";
-       	    	exit(EXIT_FAILURE);
-   		    }
-
-
-
-            placeholder = split(buffer, ' ');
-            std::string password = placeholder[1];
-
-            Client client = Client(username, password, sd);
-            
-            while(true){
-                disconnect = client.wait();
-                if(disconnect){
-                    break;
-                }
-            }*/
             
     }while(!disconnect);
     

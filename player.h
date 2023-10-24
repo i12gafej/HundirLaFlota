@@ -15,24 +15,26 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #include <iostream>
 
 class Player{
     private:
         std::string id_;
         std::string password_;
-        std::vector<std::vector<std::string>> board_;
+        std::vector<std::vector<char>> board_;
         int sd_;
         bool waiting;
         int shots_;
     public:
         //Constructor
         Player(std::string id, std::string password, int sd);
+        Player(){}
 
         //Getters
         std::string get_id(){return id_;}
         std::string get_password(){return password_;}
-        std::vector<std::vector<std::string>> get_board(){return board_;}
+        std::vector<std::vector<char>> get_board(){return board_;}
         int get_socket(){return sd_;}
         int get_shots(){return shots_;}
 
@@ -51,10 +53,10 @@ class Player{
         bool set_to_down(int size, int x, int y);
         bool set_to_left(int size, int x, int y);
         bool nearing_boats(int x, int y);
-        void set_position(int x, int y, std::string state);
+        bool out_of_limits(int x, int j);
+        void set_position(int x, int y, char state);
 
         void print_allowed_messages();
-        bool check_for_right_message(char* message);
 
 };
 
