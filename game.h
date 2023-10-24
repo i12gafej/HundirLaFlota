@@ -12,7 +12,6 @@ class Game{
         Player player1_, player2_;
         bool end_;
         bool turn_player1_;     //if its not player1 turn, its player2 
-        std::mutex mutex_;
     
     public:
         //Constructor
@@ -34,8 +33,8 @@ class Game{
 
         //Methods
         bool start();
-        int coordinate_conversion_engine(std::string s);
-        std::string attack(bool player_turn, std::string x, int y);     //returns message of state of the attack
+        int coordinate_conversion_engine(char s);
+        const char* attack(bool player_turn, char x, int y);     //returns message of state of the attack
         bool ckeck_game_ended(bool turn);
         void commute_player_turn();
         void lock_mtx();

@@ -13,7 +13,7 @@ Player::Player(std::string id, std::string password, int sd){
     waiting = true;
     shots_= 0 ;
 
-    std::vector<std::vector<std::string>> aux (10, std::vector<std::string>(10, "A"));      //init the board
+    std::vector<std::vector<char>> aux (10, std::vector<char>(10, 'A'));      //init the board
     board_ = aux;
 }
 
@@ -21,12 +21,24 @@ void Player::in_game(){
 
 }
 
-void Player::print_board(){
+void Player::print_board(){         //hay que mandarsela a los clientes
+    char board[200];
+    std::string string;
     for(int i = 0; i < 10; i++){
         for(int j = 0; j < 10; j++){
-            std::cout << board_[i][j]; 
+            string.push_back(board_[i][j]);
         }
+        string.push_back('\n');
     }
+    string.push_back('\n');
+    strcpy(board, string.c_str());
+
+
+    if(send(this->get_socket(), board, sizeof(board), 0) < 0){
+        printf("ERROR en el envío de la tabla\n%d: %s", errno, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    
 }
 
 bool Player::set_board(){
@@ -122,7 +134,7 @@ bool Player::set_board(){
 
 bool Player::set_to_up(int size, int x, int y){
     int boundary = x + size;
-    if(boundary > 10){
+    if(boundary > 9){
         return false;
     }
     for(int i=0; i<size; i++){
@@ -132,14 +144,14 @@ bool Player::set_to_up(int size, int x, int y){
     }
 
     for(int i=0; i<size; i++){
-        board_[x+i][y] = "B";
+        board_[x+i][y] = 'B';
     }
     return true;
 }
 
 bool Player::set_to_right(int size, int x, int y){
     int boundary = y + size;
-    if(boundary > 10){
+    if(boundary > 9){
         return false;
     }
     for(int i=0; i<size; i++){
@@ -148,7 +160,7 @@ bool Player::set_to_right(int size, int x, int y){
         }
     }
     for(int i=0; i<size; i++){
-        board_[x][y+i] = "B";
+        board_[x][y+i] = 'B';
     }
     return true;
 }
@@ -164,7 +176,7 @@ bool Player::set_to_down(int size, int x, int y){
         }
     }
     for(int i=0; i<size; i++){
-        board_[x-i][y] = "B";
+        board_[x-i][y] = 'B';
     }
     return true;
 }
@@ -180,46 +192,30 @@ bool Player::set_to_left(int size, int x, int y){
         }
     }
     for(int i=0; i<size; i++){
-        board_[x][y-i] = "B";
+        board_[x][y-i] = 'B';
     }
     return true;
 }
 
-bool Player::nearing_boats(int x, int y){        //rudimentary, might want to change it :P
-    if(board_[x+1][y] == "B")
-    {
-        return true;
+bool Player::nearing_boats(int x, int y){
+    for(int i=-1; i<=1; i++){
+        for(int j=-1; j<=1; j++){
+            if((i==0 && j==0) || out_of_limits(x+i, y+i)){    //elemento actual o fuera de límites
+                //condición para no hacer nada
+            }else{
+                if(board_[x+i][y+j] == 'B'){
+                    return true;
+                }
+            }
+        }
     }
-    else if(board_[x-1][y] == "B")
-    {
+    return false;
+}
+
+bool Player::out_of_limits(int x, int y){
+    if(x > 9 || x < 0 || y > 9 || y < 0){
         return true;
-    }
-    else if(board_[x][y+1] == "B")
-    {
-        return true;
-    }
-    else if(board_[x][y-1] == "B")
-    {
-        return true;
-    }
-    else if(board_[x+1][y+1] == "B")
-    {
-        return true;
-    }
-    else if(board_[x+1][y-1] == "B")
-    {
-        return true;
-    }
-    else if(board_[x-1][y+1] == "B")
-    {
-        return true;
-    }
-    else if(board_[x-1][y-1] == "B")
-    {
-        return true;
-    }
-    else
-    {
+    }else{
         return false;
     }
 }
@@ -236,6 +232,6 @@ void Player::print_allowed_messages(){
 }
 
 
-void Player::set_position(int x, int y, std::string state){
+void Player::set_position(int x, int y, char state){
     board_[x][y] = state;
 }
