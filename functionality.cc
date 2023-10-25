@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string.h>
 
+
+//May need to test it independently
 char** split(char* char_string, char delim_char){
     char** parts;
     int i = 0;
