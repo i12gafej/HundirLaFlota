@@ -7,6 +7,6 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> split(char* char_string, char delim_char);
+char** split(char* char_string, char delim_char);
 
 #endif

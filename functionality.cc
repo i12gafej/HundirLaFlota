@@ -3,16 +3,21 @@
 
 #include "functionality.h"
 #include <sstream>
+#include <string.h>
 
-std::vector<std::string> split(char* char_string, char delim_char){
-    std::string placeholder(char_string);
+char** split(char* char_string, char delim_char){
+    char** parts;
+    int i = 0;
+    char* delim = &delim_char;
 
-    std::istringstream stream(placeholder);
-    std::vector<std::string> parts;
-    std::string part;
+    char *token = strtok(char_string, delim);
 
-    while (std::getline(stream, part, delim_char)) {
-        parts.push_back(part);
+    while (token != NULL) {
+        parts[i] = token;
+
+        // Get the next token
+        token = strtok(NULL, delim);
+        i++;
     }
 
     return parts;
