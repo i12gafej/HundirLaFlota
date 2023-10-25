@@ -2,6 +2,7 @@
 //
 
 #include "game.h"
+#include "functionality.h"
 #include <errno.h>
 #include <string.h>
 #include <cstdlib>
@@ -25,55 +26,67 @@ bool Game::start(){
     char x;
     std::string game_response;
     int y;
+    char** info;
 
     do{                                 //must be prepared for requests depending on turns
         commute_player_turn();
         fd_set readfs;
         FD_ZERO(&readfs);
 
-        /*EL WHILE EN CUESTIÓN DE ABAJO EMPIEZA AQUÍ*/
-        bzero(buff, sizeof(buff));
-        if(turn_player1_){
-            FD_SET(player1_.get_socket(), &readfs);
+        do{     /*EL WHILE EN CUESTIÓN DE ABAJO EMPIEZA AQUÍ*/
+            bzero(buff, sizeof(buff));
+            if(turn_player1_){
+                FD_SET(player1_.get_socket(), &readfs);
 
-            select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
+                select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
 
-            if(FD_ISSET(player1_.get_socket(), &readfs))
-            {
-                if(recv(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
-                    printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
-                    exit(EXIT_FAILURE);
+                if(FD_ISSET(player1_.get_socket(), &readfs))
+                {
+                    if(recv(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
+                        printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
+                        exit(EXIT_FAILURE);
+                    }
+                }else{
+                    printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
                 }
-            }else{
-                printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
             }
-            player1_.shoot();
-        }
-        else
-        {
-            FD_SET(player2_.get_socket(), &readfs);
-            if(FD_ISSET(player1_.get_socket(), &readfs))
+            else
             {
-                if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
-                    printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
-                    exit(EXIT_FAILURE);
+                FD_SET(player2_.get_socket(), &readfs);
+                if(FD_ISSET(player1_.get_socket(), &readfs))
+                {
+                    if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
+                        printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
+                        exit(EXIT_FAILURE);
+                    }
+                }else{
+                    printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
                 }
-            }else{
-                printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
             }
-            player2_.shoot();
-        }
 
-        
+            info = split(buff, ' ');
+            if(strcmp(info[0], "SALIR") == 0){
+                return !turn_player1_;
+            }
 
         /*TRATAMIENTO DE LA CADENA ENVIADA:
             Entrar en un bucle while (que englobará a toda la recepción de cosas de arriba)
         y que la condición de salida sea que la cadena empiece por ATAQUE (se le debe
         indicar al cliente que la orden es incorrecta)
-            NOTA:es cuando se sale del bucle cuando se aumenta la cuenta de disparos,
+            NOTA: es cuando se sale del bucle cuando se aumenta la cuenta de disparos,
         se intentará no volver a poner más ifs*/
+        }while(strcmp(info[0], "ATAQUE") != 0);
 
-        game_response = attack(turn_player1_, x, y);
+        if(turn_player1_)
+        {
+            player1_.shoot();
+        }
+        else
+        {
+            player2_.shoot();
+        }
+
+        game_response = attack(turn_player1_, info[1], info[2]);
 
         if(turn_player1_){
             if(send(player1_.get_socket(), game_response.c_str(), sizeof(game_response.c_str()), 0) < 0){
@@ -100,29 +113,31 @@ bool Game::start(){
     return turn_player1_;
 }
 
-const char* Game::attack(bool player_turn, char x, int y){
+const char* Game::attack(bool player_turn, char* x, char* y){
 
-    int aux_coord = coordinate_conversion_engine(x);
+    int x_aux = atoi(x);
+    int y_aux = atoi(y);
     std::string return_string, y_string, x_string;
     const char* aux;
 
-    if(player_turn){                                        //player's 1 turn
-        if(player2_.get_board()[aux_coord][y] == 'A' || player2_.get_board()[aux_coord][y] == 'X')
+    if(player_turn)
+    {                                        //player's 1 turn
+        if(player2_.get_board()[x_aux][y_aux] == 'A' || player2_.get_board()[x_aux][y_aux] == 'X')
         {
-            player2_.set_position(aux_coord,y,'X');
-            y_string = std::to_string(y);
-            x_string = std::to_string(x);
+            player2_.set_position(x_aux,y_aux,'X');
+            x_string = std::to_string(x_aux);
+            y_string = std::to_string(y_aux);
             return_string = "+Ok. AGUA:" + x_string + "," + y_string;
             aux = return_string.c_str();
             return aux;
         }
         else
         {
-            player2_.set_position(aux_coord,y,'X');
-            y_string = std::to_string(y);
-            x_string = std::to_string(x);
+            player2_.set_position(x_aux,y_aux,'X');
+            x_string = std::to_string(x_aux);
+            y_string = std::to_string(y_aux);
 
-            if(player2_.nearing_boats(aux_coord, y))        //tocado y no hundido
+            if(player2_.nearing_boats(x_aux, y_aux))        //tocado y no hundido
             {
                 return_string = "+Ok. TOCADO:"+x_string+","+y_string;
                 aux = return_string.c_str();
@@ -138,22 +153,22 @@ const char* Game::attack(bool player_turn, char x, int y){
     }
     else
     {                                                  //player's 2 turn
-        if(player1_.get_board()[aux_coord][y] == 'A' || player1_.get_board()[aux_coord][y] == 'X')
+        if(player1_.get_board()[x_aux][y_aux] == 'A' || player1_.get_board()[x_aux][y_aux] == 'X')
         {
-            player1_.set_position(aux_coord,y,'X');
-            y_string = std::to_string(y);
-            x_string = std::to_string(x);
+            player1_.set_position(x_aux,y_aux,'X');
+            x_string = std::to_string(x_aux);
+            y_string = std::to_string(y_aux);
             return_string = "+Ok. AGUA:"+x_string+","+y_string;
             aux = return_string.c_str();
             return aux;
         }
         else
         {
-            player1_.set_position(aux_coord,y,'X');
-            x_string = std::to_string(x);
-            y_string = std::to_string(y);
+            player1_.set_position(x_aux,y_aux,'X');
+            x_string = std::to_string(x_aux);
+            y_string = std::to_string(y_aux);
 
-            if(player1_.nearing_boats(aux_coord, y))        //tocado y no hundido
+            if(player1_.nearing_boats(x_aux, y_aux))        //tocado y no hundido
             {
                 return_string = "+Ok. TOCADO:"+x_string+","+y_string+"\0";
                 aux = return_string.c_str();
