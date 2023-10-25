@@ -20,6 +20,7 @@
 #include "player.h"
 #include <tuple>
 #include <mutex>
+#include <map>
 
 #define MSG_SIZE 250
 #define MAX_CLIENTS 30
@@ -42,6 +43,7 @@ class Server{
          * con user y descriptor
          * 
         */
+        std::map<int, std::string> sd_dict;
     public:
 
     bool start();
@@ -52,10 +54,13 @@ class Server{
     //get
     inline std::vector<std::tuple<std::string, std::string>> getLogins(){return this->logins;};
     inline std::vector<std::tuple<std::string, int>> getValid(){return this->validados;};
+    inline std::string getUserBySd(int sd){return sd_dict.at(sd);};
+    inline std::map<int, std::string> getDict(){return sd_dict;};
         
     
     //set
     inline void pushbackValid(std::string string, int sd){this->validados.push_back(std::tuple<std::string, int>(string,sd));};
+    inline void setUserInDict(std::string user, int sd){this->sd_dict[sd] = user;};
         //sets the array form the I/O file
     void setLoginArray();
     
@@ -67,6 +72,7 @@ class Server{
     bool addValid(std::string login, int sd); // devuelve falso si a quien añades ya está validado
     bool checkLogin(std::string string);
     bool checkPassword(std::string l, std::string p);
+    bool userInDict(std::string user, int sd);
 
 };
 void manejador (int signum);

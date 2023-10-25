@@ -97,6 +97,7 @@ bool Server::start(){
             //recorre los descriptores
             for(i=0; i<FD_SETSIZE; i++)
             {    
+               
                 //Buscamos el socket por el que se ha establecido la comunicación
                 if(FD_ISSET(i, &auxfds))
                 {
@@ -116,7 +117,8 @@ bool Server::start(){
                                 arrayClientes[numClientes] = new_sd;
                                 numClientes++;
                                 FD_SET(new_sd,&readfds);
-                            
+
+                                bzero(buffer,sizeof(buffer));
                                 strcpy(buffer, "+Ok. Usuario conectado\n");
                                 send(new_sd,buffer,sizeof(buffer),0);
 
@@ -181,8 +183,6 @@ bool Server::start(){
 
                         if(recibidos > 0)
                         {
-                            
-                            
                             if(strcmp(buffer,"SALIR\n") == 0)
                             {   
                                 printf("El socket %d ha abandonado el servidor\n", i);
@@ -199,21 +199,27 @@ bool Server::start(){
                                 if(flag_user)
                                 {
                                     //usuario registrado
+                                    bzero(buffer,sizeof(buffer));
                                     sprintf(buffer , "+Ok. Usuario correcto\n");
+                                    setUserInDict(login, i);
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
                                 else
                                 {
+                                    bzero(buffer,sizeof(buffer));
                                     sprintf(buffer, "-Err. Usuario incorrecto\n");
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
                             }
                             else if(strncmp(buffer, "PASSWORD", 8) == 0)
                             {
-                                bzero(buffer, sizeof(buffer));
+                                login = getUserBySd(i);
+                                std::cout << buffer <<std::endl;
                                 contra = (char *)tratarString(buffer);
-                                if(login == "nan")
+                                contra[strlen(contra)-1] = '\0';
+                                if(!flag_user)
                                 {
+                                    bzero(buffer, sizeof(buffer));
                                     sprintf(buffer, "Hay que añadir el usuario\n");
                                     send(i, buffer, sizeof(buffer), 0);
                                 }
@@ -228,13 +234,16 @@ bool Server::start(){
                                         //sprintf(buffer,"+Ok. Usuario validado\n");
                                         if(addValid(login, i)){
                                             //ya se añadió 
+                                            bzero(buffer, sizeof(buffer));
                                             sprintf(buffer,"+Ok. Usuario validado\n");
                                             
                                         }
+                                        
                                        
                                     }
                                     else
                                     {
+                                        bzero(buffer, sizeof(buffer));
                                         sprintf(buffer, "-Err. Error en la validación\n");
                                         
                                     }
@@ -267,7 +276,8 @@ bool Server::start(){
                                     contra[strlen(contra)-1] = '\0';
                                     usuario = auxi;
                                 }   
-                                
+                                login.assign(usuario);
+                                password.assign(contra);
                                 if(strcmp(usuario, "errorf") == 0){
                                     bzero(buffer, sizeof(buffer));
                                     sprintf(buffer, "-Err. Error de formato\n");
@@ -283,12 +293,8 @@ bool Server::start(){
                                     addLogin(login, password);
                                     if(addValid(login, i)){
                                         bzero(buffer, MSG_SIZE);
-                                    sprintf(buffer, "+Ok. Usuario validado\n");
+                                        sprintf(buffer, "+Ok. Usuario validado\n");
                                     }
-
-                                    
-                                    
-                                    
                                     printLoginArray();
 
                                     flag_singup = true;
@@ -388,6 +394,7 @@ bool Server::checkLogin(std::string string){
 bool Server::checkPassword(std::string l, std::string p){
     std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
     for(int i = 0; i < loginArray.size(); i++){
+        std::cout << "l : <"+l+"> -> <"+std::get<0>(loginArray[i])+"> P <"+p+"> -> <"+std::get<1>(loginArray[i])+">"<<std::endl;
         if(l == std::get<0>(loginArray[i]) && p == std::get<1>(loginArray[i])){
             return true;
         }
@@ -439,6 +446,15 @@ void Server::printLoginArray(){
     else{
         std::cerr << "No se pudo abrir el archivo \"login.txt\"." << std::endl;
     }
+}
+bool Server::userInDict(std::string user, int sd){
+    auto mapa = getDict();
+    if(mapa.find(sd) != mapa.end()){
+        if(mapa.at(sd) == user){
+            return true;
+        }
+    }
+    return false;
 }
 char * tratarString(char * buffer){
     char *pos = strchr(buffer, ' ');
