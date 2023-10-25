@@ -5,7 +5,6 @@
 #define GAME_H
 
 #include "player.h"
-#include <mutex>
 
 class Game{
     private:
