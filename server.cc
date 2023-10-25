@@ -83,7 +83,6 @@ bool Server::start(){
     //Capturamos la señal SIGINT (Ctrl+c)
     //signal(SIGINT,manejador);                 //temporally deprecated
 
-
     //SIEMPRE ESTA ESPERANDO COSAS
     while(1){
         //Esperamos recibir mensajes de los clientes (nuevas conexiones o mensajes de los clientes ya conectados)
@@ -166,7 +165,7 @@ bool Server::start(){
                             else if(strcmp(buffer,"LOGIN\n") == 0){
                                 auto llll = getLogins();
                                 for(int log = 0; log < llll.size(); log++){
-                                    std::cout << std::get<0>(llll[log]) << " "<< std::get<0>(llll[log])<<std::endl;
+                                    std::cout << std::get<0>(llll[log]) << " "<< std::get<1>(llll[log])<<std::endl;
                                 }
                             }
                     } 
@@ -192,7 +191,7 @@ bool Server::start(){
                             else if(strncmp(buffer, "USUARIO", 7) == 0)
                             {
                                 usuario = (char *)tratarString(buffer);
-
+                                usuario[strlen(usuario)-1] = '\0';
                                 login.assign(usuario);
                                 std::cout << login << std::endl;
                                 flag_user = checkLogin(login);
@@ -211,6 +210,7 @@ bool Server::start(){
                             }
                             else if(strncmp(buffer, "PASSWORD", 8) == 0)
                             {
+                                bzero(buffer, sizeof(buffer));
                                 contra = (char *)tratarString(buffer);
                                 if(login == "nan")
                                 {
@@ -219,20 +219,26 @@ bool Server::start(){
                                 }
                                 else
                                 {
+                                    
                                     password.assign(contra);
                                     flag_pass = checkPassword(login, password);
                                 
                                     if(flag_pass)
                                     {
-                                        sprintf(buffer,"+Ok. Usuario validado\n");
-                                        pushbackValid(login);
-                                        send(i, buffer, sizeof(buffer), 0);
+                                        //sprintf(buffer,"+Ok. Usuario validado\n");
+                                        if(addValid(login, i)){
+                                            //ya se añadió 
+                                            sprintf(buffer,"+Ok. Usuario validado\n");
+                                            
+                                        }
+                                       
                                     }
                                     else
                                     {
                                         sprintf(buffer, "-Err. Error en la validación\n");
-                                        send(i, buffer, sizeof(buffer), 0);
+                                        
                                     }
+                                    send(i, buffer, sizeof(buffer), 0);
                                 }
                                 
                                 
@@ -275,10 +281,12 @@ bool Server::start(){
                                 else
                                 {
                                     addLogin(login, password);
-                                    pushbackValid(login);
-
-                                    bzero(buffer, MSG_SIZE);
+                                    if(addValid(login, i)){
+                                        bzero(buffer, MSG_SIZE);
                                     sprintf(buffer, "+Ok. Usuario validado\n");
+                                    }
+
+                                    
                                     
                                     
                                     printLoginArray();
@@ -368,10 +376,10 @@ void Server::close_client(int socket, fd_set * readfds, int * numClientes, int a
 
 }
 bool Server::checkLogin(std::string string){
-    std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
-    std::vector<std::tuple<std::string, std::string>> ::iterator it;
-    for(it = loginArray.begin(); it != loginArray.end(); *it++){
+    auto loginArray = getLogins();
+    for(auto it = loginArray.begin(); it != loginArray.end(); *it++){
         if(string == std::get<0>(*it)){
+            
             return true;
         }
     }
@@ -396,8 +404,9 @@ void Server::setLoginArray(){
             std::string usuario, contrasena;
             
             stream >> usuario >> contrasena;
-            //std::cout << "Usuario: "<< usuario <<" contraseña: "<<contrasena<<std::endl;
             addLogin(usuario, contrasena);
+            usuario = "";
+            contrasena = "";
         }
         f.close();
     }
@@ -405,14 +414,14 @@ void Server::setLoginArray(){
         std::cerr << "No se pudo abrir el archivo \"login.txt\"." << std::endl;
     }
 }
-bool Server::addValid(std::string login){
+bool Server::addValid(std::string login, int sd){
     auto old_valid = getValid();
     for(int i = 0; i < old_valid.size(); i++){
-        if(login == old_valid[i]){
+        if(login == std::get<0>(old_valid[i])){
             return false;
         }
     }
-    pushbackValid(login);
+    pushbackValid(login, sd);
     return true;
 
 }

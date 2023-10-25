@@ -31,7 +31,17 @@
 class Server{
     private:
         std::vector<std::tuple<std::string, std::string>> logins;
-        std::vector<std::string> validados;
+        std::vector<std::tuple<std::string, int>> validados;
+        /**
+         * Hay que hacer un sistema que nos permita guardar el descriptor del usuario 
+         * y asignarlo para toda la ejecución del programa, con lo que ahora validados
+         * std::vector<std::string> validados;
+         *                 | |
+         *                  V
+         * std::vector<std::tuple<std::string, int>> validados;
+         * con user y descriptor
+         * 
+        */
     public:
 
     bool start();
@@ -41,11 +51,11 @@ class Server{
 
     //get
     inline std::vector<std::tuple<std::string, std::string>> getLogins(){return this->logins;};
-    inline std::vector<std::string> getValid(){return this->validados;};
+    inline std::vector<std::tuple<std::string, int>> getValid(){return this->validados;};
         
     
     //set
-    inline void pushbackValid(std::string string){this->validados.push_back(string);};
+    inline void pushbackValid(std::string string, int sd){this->validados.push_back(std::tuple<std::string, int>(string,sd));};
         //sets the array form the I/O file
     void setLoginArray();
     
@@ -53,8 +63,8 @@ class Server{
         //prints the array to the I/O file
     void printLoginArray();
     //method
-    inline void addLogin(std::string login, std::string password){this->logins.push_back(std::tuple<std::string, std::string>(login, password));};
-    bool addValid(std::string login); // devuelve salfo si a quien añades ya está validado
+    void addLogin(std::string login, std::string password){this->logins.push_back(std::tuple<std::string, std::string>(login, password));};
+    bool addValid(std::string login, int sd); // devuelve falso si a quien añades ya está validado
     bool checkLogin(std::string string);
     bool checkPassword(std::string l, std::string p);
 
