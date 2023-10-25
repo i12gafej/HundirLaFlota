@@ -32,12 +32,10 @@ class Game{
 
         //Methods
         bool start();
-        int coordinate_conversion_engine(char s);
+        int coordinate_conversion_engine(char* s);
         const char* attack(bool player_turn, char* x, char* y);     //returns message of state of the attack
         bool ckeck_game_ended(bool turn);
         void commute_player_turn();
-        void lock_mtx();
-        void unlock_mtx();
 
 };
 

@@ -78,6 +78,7 @@ int main(){
                 
                 bzero(buffer, sizeof(buffer));
                 fgets(buffer, sizeof(buffer), stdin);
+                buffer[strlen(buffer)] = '\0';      //may change it
 
                 if(strcmp(buffer, "SALIR\n") == 0){
                     disconnect = true;

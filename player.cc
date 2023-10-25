@@ -17,11 +17,8 @@ Player::Player(std::string id, std::string password, int sd){
     board_ = aux;
 }
 
-void Player::in_game(){
-
-}
-
-void Player::print_board(){         //hay que mandarsela a los clientes
+//May want to check the board in inverse order for printeability purposes
+void Player::print_board(){
     char board[200];
     std::string string;
     for(int i = 0; i < 10; i++){
@@ -219,18 +216,6 @@ bool Player::out_of_limits(int x, int y){
         return false;
     }
 }
-
-/*void Player::print_allowed_messages(){
-    std::cout << "Los mensajes permitidos son:\n"
-        "USUARIO <username>: se pide el registro con ese usuario\n"
-        "PASSWORD <password>: se introduce la contraseña para el usuario anterior\n"
-        "REGISTRO -u <usuario> -p <password>: se añade al sistema ese usuario con esa"
-            "contraseña\n"
-        "INICIAR-PARTIDA: se le pide al servidor entrar en partida\n"
-        "DISPARO <letra>,<numero>: en una partida, se dispara a esas coordenadas\n"
-        "SALIR: se desconecta del servidor\n";
-}*/
-
 
 void Player::set_position(int x, int y, char state){
     board_[x][y] = state;

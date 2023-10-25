@@ -35,9 +35,9 @@ bool Game::start(){
 
         do{     /*EL WHILE EN CUESTIÓN DE ABAJO EMPIEZA AQUÍ*/
             bzero(buff, sizeof(buff));
-            if(turn_player1_){
+            if(turn_player1_)
+            {
                 FD_SET(player1_.get_socket(), &readfs);
-
                 select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
 
                 if(FD_ISSET(player1_.get_socket(), &readfs))
@@ -53,6 +53,9 @@ bool Game::start(){
             else
             {
                 FD_SET(player2_.get_socket(), &readfs);
+                printf("Esperando en el select del jugador dos\n");
+                select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
+
                 if(FD_ISSET(player1_.get_socket(), &readfs))
                 {
                     if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
@@ -65,16 +68,11 @@ bool Game::start(){
             }
 
             info = split(buff, ' ');
+            printf("info 1: %s, info 2: %s, info 3: %s\n", info[0], info[1], info[2]);
             if(strcmp(info[0], "SALIR") == 0){
                 return !turn_player1_;
             }
 
-        /*TRATAMIENTO DE LA CADENA ENVIADA:
-            Entrar en un bucle while (que englobará a toda la recepción de cosas de arriba)
-        y que la condición de salida sea que la cadena empiece por ATAQUE (se le debe
-        indicar al cliente que la orden es incorrecta)
-            NOTA: es cuando se sale del bucle cuando se aumenta la cuenta de disparos,
-        se intentará no volver a poner más ifs*/
         }while(strcmp(info[0], "ATAQUE") != 0);
 
         if(turn_player1_)
@@ -86,6 +84,8 @@ bool Game::start(){
             player2_.shoot();
         }
 
+        /*Problem is now in coordinates, but should be fine by inspecting them in attack function*/
+        //const char*           //give it an eye
         game_response = attack(turn_player1_, info[1], info[2]);
 
         if(turn_player1_){
@@ -108,15 +108,15 @@ bool Game::start(){
 
     }while(!this->has_ended());
 
-    /*Returns the turn of the player that has won. That means true for player 1 victory and
-    and false for player 2 victory. The printing can be done in the server, but also here lol*/
     return turn_player1_;
 }
 
 const char* Game::attack(bool player_turn, char* x, char* y){
 
-    int x_aux = atoi(x);
+    int x_aux = coordinate_conversion_engine(x);
     int y_aux = atoi(y);
+    y_aux--;                        //para ajustar la segunda coordenada a los índices de la matriz
+
     std::string return_string, y_string, x_string;
     const char* aux;
 
@@ -127,7 +127,7 @@ const char* Game::attack(bool player_turn, char* x, char* y){
             player2_.set_position(x_aux,y_aux,'X');
             x_string = std::to_string(x_aux);
             y_string = std::to_string(y_aux);
-            return_string = "+Ok. AGUA:" + x_string + "," + y_string;
+            return_string = "+Ok. Agua:" + x_string + "," + y_string;
             aux = return_string.c_str();
             return aux;
         }
@@ -139,13 +139,13 @@ const char* Game::attack(bool player_turn, char* x, char* y){
 
             if(player2_.nearing_boats(x_aux, y_aux))        //tocado y no hundido
             {
-                return_string = "+Ok. TOCADO:"+x_string+","+y_string;
+                return_string = "+Ok. Tocado:"+x_string+","+y_string;
                 aux = return_string.c_str();
                 return aux;
             }
             else                                            //tocado y hundido
             {
-                return_string = "+Ok. HUNDIDO:"+x_string+","+y_string;
+                return_string = "+Ok. Hundido:"+x_string+","+y_string;
                 aux = return_string.c_str();
                 return aux;
             }
@@ -158,7 +158,7 @@ const char* Game::attack(bool player_turn, char* x, char* y){
             player1_.set_position(x_aux,y_aux,'X');
             x_string = std::to_string(x_aux);
             y_string = std::to_string(y_aux);
-            return_string = "+Ok. AGUA:"+x_string+","+y_string;
+            return_string = "+Ok. Agua:"+x_string+","+y_string;
             aux = return_string.c_str();
             return aux;
         }
@@ -185,28 +185,30 @@ const char* Game::attack(bool player_turn, char* x, char* y){
 
 }
 
-int Game::coordinate_conversion_engine(char s){
-    if(s == 'A'){
+int Game::coordinate_conversion_engine(char* s){
+    if(s == "A" || s == "a"){
         return 0;
-    }else if(s == 'B'){
+    }else if(s == "B" || s == "b"){
         return 1;
-    }else if(s == 'C'){
+    }else if(s == "C" || s == "c"){
         return 2;
-    }else if(s == 'D'){
+    }else if(s == "D" || s == "d"){
         return 3;
-    }else if(s == 'E'){
+    }else if(s == "E" || s == "e"){
         return 4;
-    }else if(s == 'F'){
+    }else if(s == "F" || s == "f"){
         return 5;
-    }else if(s == 'G'){
+    }else if(s == "G" || s == "g"){
         return 6;
-    }else if(s == 'H'){
+    }else if(s == "H" || s == "h"){
         return 7;
-    }else if(s == 'I'){
+    }else if(s == "I" || s == "i"){
         return 8;
     }else{
         return 9;
-    }
+    }/*else{
+        return -1;
+    }*/
 }
 
 bool Game::ckeck_game_ended(bool turn){

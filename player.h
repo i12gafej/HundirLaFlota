@@ -56,8 +56,6 @@ class Player{
         bool out_of_limits(int x, int j);
         void set_position(int x, int y, char state);
 
-        void print_allowed_messages();
-
 };
 
 #endif
