@@ -8,7 +8,9 @@
 char** split(char* char_string, char delim_char){
     char** parts;
     int i = 0;
-    char* delim = &delim_char;
+    char delim[2];
+    delim[0] = delim_char;
+    delim[1] = '\0';
 
     char *token = strtok(char_string, delim);
 
