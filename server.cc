@@ -193,7 +193,7 @@ bool Server::start(){
                                 usuario = (char *)tratarString(buffer);
                                 usuario[strlen(usuario)-1] = '\0';
                                 login.assign(usuario);
-                                std::cout << login << std::endl;
+                                
                                 flag_user = checkLogin(login);
 
                                 if(flag_user)
@@ -214,7 +214,6 @@ bool Server::start(){
                             else if(strncmp(buffer, "PASSWORD", 8) == 0)
                             {
                                 login = getUserBySd(i);
-                                std::cout << buffer <<std::endl;
                                 contra = (char *)tratarString(buffer);
                                 contra[strlen(contra)-1] = '\0';
                                 if(!flag_user)
@@ -293,7 +292,7 @@ bool Server::start(){
                                     addLogin(login, password);
                                     if(addValid(login, i)){
                                         bzero(buffer, MSG_SIZE);
-                                        sprintf(buffer, "+Ok. Usuario validado\n");
+                                        sprintf(buffer, "+Ok. Usuario registrado\n");
                                     }
                                     printLoginArray();
 
@@ -306,7 +305,16 @@ bool Server::start(){
                                 
                                 send(i, buffer, sizeof(buffer), 0);
                             }
-                            else if(aux == "INICIAR-PARTIDA"){
+                            else if(strcmp(buffer, "INICIAR-PARTIDA\n") == 0){
+                                login = getUserBySd(i);
+                                if(isValidBySd(login, i) == false){
+                                    bzero(buffer, MSG_SIZE);
+                                    sprintf(buffer, "--Err. Usuario no válido\n");
+                                }
+                                else{
+                                    std::cout << "A INICIAOAS DASOD" <<std::endl;
+                                }
+
                                 /*PASOS:
                                 1. Crear el player.
                                 2. Poner la flag a wait = true
@@ -394,7 +402,6 @@ bool Server::checkLogin(std::string string){
 bool Server::checkPassword(std::string l, std::string p){
     std::vector<std::tuple<std::string, std::string>> loginArray = getLogins();
     for(int i = 0; i < loginArray.size(); i++){
-        std::cout << "l : <"+l+"> -> <"+std::get<0>(loginArray[i])+"> P <"+p+"> -> <"+std::get<1>(loginArray[i])+">"<<std::endl;
         if(l == std::get<0>(loginArray[i]) && p == std::get<1>(loginArray[i])){
             return true;
         }
@@ -423,8 +430,8 @@ void Server::setLoginArray(){
 }
 bool Server::addValid(std::string login, int sd){
     auto old_valid = getValid();
-    for(int i = 0; i < old_valid.size(); i++){
-        if(login == std::get<0>(old_valid[i])){
+    for(auto it = old_valid.begin(); it != old_valid.end(); it++){
+        if(login == std::get<0>(*it)){
             return false;
         }
     }
@@ -451,6 +458,15 @@ bool Server::userInDict(std::string user, int sd){
     auto mapa = getDict();
     if(mapa.find(sd) != mapa.end()){
         if(mapa.at(sd) == user){
+            return true;
+        }
+    }
+    return false;
+}
+bool Server::isValidBySd(std::string user, int sd){
+    auto v = getValid();
+    for(auto it = v.begin(); it != v.end(); it++){
+        if(user == std::get<0>(*it) && sd == std::get<1>(*it)){
             return true;
         }
     }

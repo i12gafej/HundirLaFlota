@@ -73,6 +73,7 @@ class Server{
     bool checkLogin(std::string string);
     bool checkPassword(std::string l, std::string p);
     bool userInDict(std::string user, int sd);
+    bool isValidBySd(std::string string, int sd);
 
 };
 void manejador (int signum);
