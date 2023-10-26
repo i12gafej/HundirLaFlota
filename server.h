@@ -46,7 +46,7 @@ class Server{
          * 
         */
         std::map<int, std::string> sd_dict;
-        std::list<Player> pWait; //player waiting
+        std::list<Player> players; //player waiting
         std::vector<Game> pPlaying;
     public:
 
@@ -64,16 +64,18 @@ class Server{
     inline std::string getUserBySd(int sd){return sd_dict.at(sd);};
     inline std::map<int, std::string> getDict(){return sd_dict;};
 
-    inline size_t getNWaitingUsers(){return pWait.size();};
-    inline Player getFrontPlayer(){return pWait.front();};
+    inline size_t getNPlayers(){return players.size();};
+    inline Player getFrontPlayer(){return players.front();};
+
+    inline std::vector<Game> getGames(){return pPlaying;};
         
     
     //set
     inline void pushbackValid(std::string string, int sd){this->validados.push_back(std::tuple<std::string, int>(string,sd));};
     inline void setUserInDict(std::string user, int sd){this->sd_dict[sd] = user;};
 
-    inline void pushbackWait(Player player){this->pWait.push_back(player);};
-    inline void popWait(){this->pWait.pop_front();};
+    inline void pushbackPlayer(Player player){this->players.push_back(player);};
+    inline void popPlayer(){this->players.pop_front();};
 
     inline void pushbackActive(Player p1, Player p2){this->pPlaying.push_back(Game(p1, p2));};
     inline void popActive(){this->pPlaying.pop_back();};
@@ -90,6 +92,8 @@ class Server{
     bool checkPassword(std::string l, std::string p);
     bool userInDict(std::string user, int sd);
     bool isValidBySd(std::string string, int sd);
+
+    bool sdIsInGame(int sd);
 
 };
 void manejador (int signum);

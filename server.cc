@@ -101,6 +101,9 @@ bool Server::start(){
                 //Buscamos el socket por el que se ha establecido la comunicación
                 if(FD_ISSET(i, &auxfds))
                 {
+                    std::string aux, login = "nan", password;
+                    login = getUserBySd(i);                    
+                    
                     //si el socket con el que se ha establecido la conexion es el que buscamos
                     if( i == sd)
                     {
@@ -178,7 +181,7 @@ bool Server::start(){
                         sbuffer = "";
                         recibidos = recv(i,buffer,sizeof(buffer),0);
                         sbuffer.assign(buffer);
-                        std::string aux, login = "nan", password;
+                        
                         //std::istringstream stream(sbuffer);
 
                         if(recibidos > 0)
@@ -332,25 +335,32 @@ bool Server::start(){
                                 else{
 
                                     Player p1 = Player(login, password, i);
-                                    pushbackWait(p1);
-                                    auto nWait = getNWaitingUsers();
+                                    pushbackPlayer(p1);
+                                    auto nWait = getNPlayers();
                                     if(nWait < 2){
                                         std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                         bzero(buffer, sizeof(buffer));
-                                        sprintf(buffer, "Esperando jugadores\n");
+                                        sprintf(buffer, "+Ok. Esperando jugadores\n");
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else{
                                         if(nWait % 2 != 0){
                                             std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                             bzero(buffer, sizeof(buffer));
-                                            sprintf(buffer, "Esperando jugadores\n");
+                                            sprintf(buffer, "+Ok. Esperando jugadores\n");
                                             send(i, buffer, sizeof(buffer), 0);  
                                         }
                                         else{
                                             Player p2 = getFrontPlayer();
-                                            popWait();
+                                            p2.set_wait(false);
+                                            p1.set_wait(false);
                                             pushbackActive(p1, p2);
+                                            bzero(buffer, sizeof(buffer));
+                                            sprintf(buffer, "“+Ok. Empieza la partida\n");
+                                            //std::cout << "P1 socket: "<< p1.get_socket()<<std::endl;
+                                            //std::cout << "P2 socket: "<< p2.get_socket()<<std::endl;
+                                            send(i, buffer, sizeof(buffer), 0);
+                                            //send(p2.get_socket(), buffer, sizeof(buffer), 0);
                                             //lanzar juego
                                         }
                                     }
@@ -359,7 +369,7 @@ bool Server::start(){
 
                                 /*PASOS:
                                 1. Crear el player.
-                                2. Poner la flag a wait = true
+                                2. Poner la flag a wait = false
                                 3. Comprobar en la lista de clientes si hay más esperando.
                                 3.1. Si no hay esperando, a esperar.
                                 3.2. Si hay esperando, se empieza el juego (se notifica a los
@@ -522,6 +532,17 @@ std::string Server::getPassByUser(std::string user){
         }
     }
     return nullptr;
+}
+bool Server::sdIsInGame(int sd){
+    auto v = getGames();
+    for(auto it = v.begin(); it != v.end(); it++){
+        if(it->get_player1().get_socket() == sd || 
+        it->get_player2().get_socket() == sd){
+            return true;
+        }
+    }
+    
+    return false;
 }
 char * tratarString(char * buffer){
     char *pos = strchr(buffer, ' ');

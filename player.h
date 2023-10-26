@@ -43,6 +43,7 @@ class Player{
         void set_id(std::string id){id_ = id;}
         void set_password(std::string password){password_ = password;}
         void shoot(){shots_++;}
+        void set_wait(bool t){waiting = t;};
 
         //Methods
         void in_game();
