@@ -101,9 +101,8 @@ bool Server::start(){
                 //Buscamos el socket por el que se ha establecido la comunicación
                 if(FD_ISSET(i, &auxfds))
                 {
-                    std::string aux, login = "nan", password;
-                    login = getUserBySd(i);                    
-                    
+                    std::string aux, login = getUserBySd(i), password;
+                                      
                     //si el socket con el que se ha establecido la conexion es el que buscamos
                     if( i == sd)
                     {
@@ -339,14 +338,14 @@ bool Server::start(){
                                     pushbackPlayer(p1);
                                     auto nWait = getNPlayers();
                                     if(nWait < 2){
-                                        std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
+                                        //std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                         bzero(buffer, sizeof(buffer));
                                         sprintf(buffer, "+Ok. Esperando jugadores\n");
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else{
                                         if(nWait % 2 != 0){
-                                            std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
+                                            //std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                             bzero(buffer, sizeof(buffer));
                                             sprintf(buffer, "+Ok. Esperando jugadores\n");
                                             send(i, buffer, sizeof(buffer), 0);  
@@ -380,24 +379,24 @@ bool Server::start(){
                                 //NOTA: código que funciona en la versión local de prueba
                                 
                                 /*DATOS USADOS COMO PRUEBA*/
-                                Player player1("1", "foo", i);
-                                Player player2("2", "foo", i);
-                                Game game(player1, player2);
-                                /*DATOS USADOS COMO PRUEBA*/
+                                // Player player1("1", "foo", i);
+                                // Player player2("2", "foo", i);
+                                // Game game(player1, player2);
+                                // /*DATOS USADOS COMO PRUEBA*/
 
-                                bool end;
-                                end = game.start();
+                                // bool end;
+                                // end = game.start();
 
-                                bzero(buffer, sizeof(buffer));
-                                if(end){
-                                    sprintf(buffer, "Ha ganado %s con %d disparos\n", player1.get_id().c_str(),
-                                        player1.get_shots());
-                                    send(player1.get_socket(), buffer, sizeof(buffer), 0);
-                                }else{
-                                    sprintf(buffer, "Ha ganado %s con %d disparos\n", player2.get_id().c_str(),
-                                        player2.get_shots());   
-                                    send(player1.get_socket(), buffer, sizeof(buffer), 0);
-                                }
+                                // bzero(buffer, sizeof(buffer));
+                                // if(end){
+                                //     sprintf(buffer, "Ha ganado %s con %d disparos\n", player1.get_id().c_str(),
+                                //         player1.get_shots());
+                                //     send(player1.get_socket(), buffer, sizeof(buffer), 0);
+                                // }else{
+                                //     sprintf(buffer, "Ha ganado %s con %d disparos\n", player2.get_id().c_str(),
+                                //         player2.get_shots());   
+                                //     send(player1.get_socket(), buffer, sizeof(buffer), 0);
+                                // }
                                 
                             }
                             //queda mas
@@ -566,6 +565,14 @@ bool Server::sdIsInGame(int sd){
     }
     
     return false;
+}
+std::string Server::getUserBySd(int sd){
+    if(sd_dict.find(sd) == sd_dict.end()){
+        return "nan";
+    }
+    else{
+        return sd_dict.at(sd);
+    }    
 }
 char * tratarString(char * buffer){
     char *pos = strchr(buffer, ' ');

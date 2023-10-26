@@ -61,7 +61,7 @@ class Server{
 
     inline std::vector<std::tuple<std::string, int>> getValid(){return this->validados;};
 
-    inline std::string getUserBySd(int sd){return sd_dict.at(sd);};
+    std::string getUserBySd(int sd);
     inline std::map<int, std::string> getDict(){return sd_dict;};
 
     inline size_t getNPlayers(){return players.size();};
