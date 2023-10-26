@@ -36,6 +36,12 @@ bool Game::start(){
         FD_ZERO(&readfs);
 
         do{
+            /**
+             * TODO: 
+             *  es tu turno
+             *  que no se quede colgao
+             * 
+            */
             bzero(buff, sizeof(buff));
             if(turn_player1_)
             {

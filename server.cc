@@ -79,7 +79,7 @@ bool Server::start(){
     FD_SET(sd,&readfds);
     FD_SET(0,&readfds);
     
-    bool flag_user = false, flag_pass = false, flag_singup = false, flag_init = false; 
+    bool flag_user = false, flag_pass = false, flag_singup = false, flag_init = false, end = false; 
     //Capturamos la señal SIGINT (Ctrl+c)
     //signal(SIGINT,manejador);                 //temporally deprecated
 
@@ -102,7 +102,15 @@ bool Server::start(){
                 if(FD_ISSET(i, &auxfds))
                 {
                     std::string aux, login = getUserBySd(i), password;
-                                      
+                    if(login != "nan"){
+                        if(userInDict(login, sd)){
+                            auto juego = sdIsInGame(i);
+                            if(juego != nullptr){
+                                end = juego->start();
+                            }
+                            
+                        }
+                    }
                     //si el socket con el que se ha establecido la conexion es el que buscamos
                     if( i == sd)
                     {
@@ -355,11 +363,13 @@ bool Server::start(){
                                             p2.set_wait(false);
                                             p1.set_wait(false);
                                             pushbackActive(p1, p2);
-                                            bzero(buffer, sizeof(buffer));
-                                            sprintf(buffer, "“+Ok. Empieza la partida\n");
+                                            auto game = sdIsInGame(i);
+                                            bool end = game->start();
+                                            //bzero(buffer, sizeof(buffer));
+                                            //sprintf(buffer, "“+Ok. Empieza la partida\n");
                                             //std::cout << "P1 socket: "<< p1.get_socket()<<std::endl;
                                             //std::cout << "P2 socket: "<< p2.get_socket()<<std::endl;
-                                            send(i, buffer, sizeof(buffer), 0);
+                                            //send(i, buffer, sizeof(buffer), 0);
                                             //send(p2.get_socket(), buffer, sizeof(buffer), 0);
                                             //lanzar juego
                                         }
@@ -555,16 +565,16 @@ std::string Server::getPassByUser(std::string user){
     }
     return nullptr;
 }
-bool Server::sdIsInGame(int sd){
+std::unique_ptr<Game> Server::sdIsInGame(int sd){
     auto v = getGames();
     for(auto it = v.begin(); it != v.end(); it++){
         if(it->get_player1().get_socket() == sd || 
         it->get_player2().get_socket() == sd){
-            return true;
+            return std::make_unique<Game>(*it);
         }
     }
     
-    return false;
+    return nullptr;
 }
 std::string Server::getUserBySd(int sd){
     if(sd_dict.find(sd) == sd_dict.end()){

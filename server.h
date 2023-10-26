@@ -23,6 +23,7 @@
 #include <mutex>
 #include <map>
 #include <list>
+#include <memory>
 
 #define MSG_SIZE 250
 #define MAX_CLIENTS 30
@@ -93,7 +94,7 @@ class Server{
     bool userInDict(std::string user, int sd);
     bool isValidBySd(std::string string, int sd);
 
-    bool sdIsInGame(int sd);
+    std::unique_ptr<Game> sdIsInGame(int sd); //devuelve referencia al juego que se está cursando
 
 };
 void manejador (int signum);
