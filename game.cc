@@ -17,9 +17,9 @@ Game::Game(Player player1, Player player2){
 /*TODO control the contrary board*/
 
 bool Game::start(){
-    //player1_.set_board();
+    player1_.set_board();
     player1_.print_board();
-    //player2_.set_board();
+    player2_.set_board();
     player2_.print_board();
 
     char buff[100];
