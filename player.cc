@@ -59,6 +59,10 @@ void Player::print_contrary_board(){
     }
 }
 
+char Player::get_position(int x, int y){
+    return board_[x][y];
+}
+
 bool Player::set_board(){
 
     srand(time(0));
@@ -240,4 +244,8 @@ bool Player::out_of_limits(int x, int y){
 
 void Player::set_position(int x, int y, char state){
     board_[x][y] = state;
+}
+
+void Player::set_contrary_position(int x, int y, char state){
+    contrary_board_[x][y] = state;
 }

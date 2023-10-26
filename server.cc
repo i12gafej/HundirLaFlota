@@ -325,7 +325,8 @@ bool Server::start(){
                                 
                                 send(i, buffer, sizeof(buffer), 0);
                             }
-                            else if(strcmp(buffer, "INICIAR-PARTIDA\n") == 0){
+                            else if(strcmp(buffer, "INICIAR-PARTIDA\n") == 0)
+                            {
                                 login = getUserBySd(i);
                                 password = getPassByUser(login);
                                 if(isValidBySd(login, i) == false){
@@ -375,6 +376,28 @@ bool Server::start(){
                                 3.2. Si hay esperando, se empieza el juego (se notifica a los
                                     dos mediante el socket)
                                 Para el 3.2 es posible que haya que paralelizar fork y wait aquí dentro*/
+
+                                //NOTA: código que funciona en la versión local de prueba
+                                
+                                /*DATOS USADOS COMO PRUEBA*/
+                                Player player1("1", "foo", i);
+                                Player player2("2", "foo", i);
+                                Game game(player1, player2);
+                                /*DATOS USADOS COMO PRUEBA*/
+
+                                bool end;
+                                end = game.start();
+
+                                bzero(buffer, sizeof(buffer));
+                                if(end){
+                                    sprintf(buffer, "Ha ganado %s con %d disparos\n", player1.get_id().c_str(),
+                                        player1.get_shots());
+                                    send(player1.get_socket(), buffer, sizeof(buffer), 0);
+                                }else{
+                                    sprintf(buffer, "Ha ganado %s con %d disparos\n", player2.get_id().c_str(),
+                                        player2.get_shots());   
+                                    send(player1.get_socket(), buffer, sizeof(buffer), 0);
+                                }
                                 
                             }
                             //queda mas

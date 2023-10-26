@@ -36,18 +36,20 @@ class Player{
         std::string get_id(){return id_;}
         std::string get_password(){return password_;}
         std::vector<std::vector<char>> get_board(){return board_;}
+        std::vector<std::vector<char>> get_constrary_board(){return contrary_board_;}
         int get_socket(){return sd_;}
         int get_shots(){return shots_;}
+        char get_position(int x, int y);
 
         //Setters
         void set_id(std::string id){id_ = id;}
         void set_password(std::string password){password_ = password;}
         void shoot(){shots_++;}
-        void set_wait(bool t){waiting = t;};
+        void set_wait(bool t){waiting = t;}
+        void set_position(int x, int y, char state);
+        void set_contrary_position(int x, int y, char state);
 
         //Methods
-        void in_game();
-
         void print_board();
         void print_contrary_board();
         bool set_board();
@@ -57,7 +59,6 @@ class Player{
         bool set_to_left(int size, int x, int y);
         bool nearing_boats(int x, int y);
         bool out_of_limits(int x, int j);
-        void set_position(int x, int y, char state);
 
 };
 
