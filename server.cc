@@ -193,16 +193,33 @@ bool Server::start(){
                                 usuario = (char *)tratarString(buffer);
                                 usuario[strlen(usuario)-1] = '\0';
                                 login.assign(usuario);
+                                bool ya_ingresado = false;
                                 
                                 flag_user = checkLogin(login);
+                                
+                                auto d = getDict();                            
+                                for (const auto& entrada : d) {
+                                    if (entrada.second == login) {
+                                        ya_ingresado = true;
+                                    }
+                                }
+                                
 
                                 if(flag_user)
                                 {
-                                    //usuario registrado
-                                    bzero(buffer,sizeof(buffer));
-                                    sprintf(buffer , "+Ok. Usuario correcto\n");
-                                    setUserInDict(login, i);
-                                    send(i, buffer, sizeof(buffer), 0);
+                                    if(ya_ingresado){
+                                        bzero(buffer,sizeof(buffer));
+                                        sprintf(buffer, "-Err. Usuario ya validado\n");
+                                        send(i, buffer, sizeof(buffer), 0);
+                                    }
+                                    else{
+                                        //usuario registrado
+                                        bzero(buffer,sizeof(buffer));
+                                        sprintf(buffer , "+Ok. Usuario correcto\n");
+                                        setUserInDict(login, i);
+                                        send(i, buffer, sizeof(buffer), 0);
+                                    }
+                                        
                                 }
                                 else
                                 {
@@ -318,12 +335,14 @@ bool Server::start(){
                                     pushbackWait(p1);
                                     auto nWait = getNWaitingUsers();
                                     if(nWait < 2){
+                                        std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                         bzero(buffer, sizeof(buffer));
                                         sprintf(buffer, "Esperando jugadores\n");
                                         send(i, buffer, sizeof(buffer), 0);
                                     }
                                     else{
-                                        if(nWait % 2 != 1){
+                                        if(nWait % 2 != 0){
+                                            std::cout << "NWAIT : "+std::to_string(nWait) <<std::endl;
                                             bzero(buffer, sizeof(buffer));
                                             sprintf(buffer, "Esperando jugadores\n");
                                             send(i, buffer, sizeof(buffer), 0);  

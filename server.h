@@ -18,6 +18,7 @@
 #include <sstream>
 #include <fstream>
 #include "player.h"
+#include "game.h"
 #include <tuple>
 #include <mutex>
 #include <map>
@@ -46,7 +47,7 @@ class Server{
         */
         std::map<int, std::string> sd_dict;
         std::list<Player> pWait; //player waiting
-        std::vector<std::tuple<Player, Player>> pPlaying;
+        std::vector<Game> pPlaying;
     public:
 
     bool start();
@@ -74,7 +75,7 @@ class Server{
     inline void pushbackWait(Player player){this->pWait.push_back(player);};
     inline void popWait(){this->pWait.pop_front();};
 
-    inline void pushbackActive(Player p1, Player p2){this->pPlaying.push_back(std::tuple<Player, Player>(p1, p2));};
+    inline void pushbackActive(Player p1, Player p2){this->pPlaying.push_back(Game(p1, p2));};
     inline void popActive(){this->pPlaying.pop_back();};
         //sets the array form the I/O file
     void setLoginArray();
