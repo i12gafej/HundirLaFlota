@@ -14,6 +14,8 @@ Game::Game(Player player1, Player player2){
     turn_player1_ = false;
 }
 
+/*TODO control the contrary board*/
+
 bool Game::start(){
     player1_.set_board();
     player1_.print_board();
@@ -33,7 +35,7 @@ bool Game::start(){
         fd_set readfs;
         FD_ZERO(&readfs);
 
-        do{     /*EL WHILE EN CUESTIÓN DE ABAJO EMPIEZA AQUÍ*/
+        do{
             bzero(buff, sizeof(buff));
             if(turn_player1_)
             {
@@ -102,8 +104,8 @@ bool Game::start(){
             }
         }
 
-        player1_.print_board();
-        player2_.print_board();
+        player1_.print_contrary_board();
+        player2_.print_contrary_board();
         this->set_has_ended(ckeck_game_ended(turn_player1_));
 
     }while(!this->has_ended());
