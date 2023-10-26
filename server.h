@@ -21,6 +21,7 @@
 #include <tuple>
 #include <mutex>
 #include <map>
+#include <list>
 
 #define MSG_SIZE 250
 #define MAX_CLIENTS 30
@@ -44,6 +45,8 @@ class Server{
          * 
         */
         std::map<int, std::string> sd_dict;
+        std::list<Player> pWait; //player waiting
+        std::vector<std::tuple<Player, Player>> pPlaying;
     public:
 
     bool start();
@@ -53,14 +56,26 @@ class Server{
 
     //get
     inline std::vector<std::tuple<std::string, std::string>> getLogins(){return this->logins;};
+    std::string getPassByUser(std::string user);
+
     inline std::vector<std::tuple<std::string, int>> getValid(){return this->validados;};
+
     inline std::string getUserBySd(int sd){return sd_dict.at(sd);};
     inline std::map<int, std::string> getDict(){return sd_dict;};
+
+    inline size_t getNWaitingUsers(){return pWait.size();};
+    inline Player getFrontPlayer(){return pWait.front();};
         
     
     //set
     inline void pushbackValid(std::string string, int sd){this->validados.push_back(std::tuple<std::string, int>(string,sd));};
     inline void setUserInDict(std::string user, int sd){this->sd_dict[sd] = user;};
+
+    inline void pushbackWait(Player player){this->pWait.push_back(player);};
+    inline void popWait(){this->pWait.pop_front();};
+
+    inline void pushbackActive(Player p1, Player p2){this->pPlaying.push_back(std::tuple<Player, Player>(p1, p2));};
+    inline void popActive(){this->pPlaying.pop_back();};
         //sets the array form the I/O file
     void setLoginArray();
     

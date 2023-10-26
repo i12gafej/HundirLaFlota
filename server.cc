@@ -307,12 +307,35 @@ bool Server::start(){
                             }
                             else if(strcmp(buffer, "INICIAR-PARTIDA\n") == 0){
                                 login = getUserBySd(i);
+                                password = getPassByUser(login);
                                 if(isValidBySd(login, i) == false){
                                     bzero(buffer, MSG_SIZE);
                                     sprintf(buffer, "--Err. Usuario no válido\n");
                                 }
                                 else{
-                                    std::cout << "A INICIAOAS DASOD" <<std::endl;
+
+                                    Player p1 = Player(login, password, i);
+                                    pushbackWait(p1);
+                                    auto nWait = getNWaitingUsers();
+                                    if(nWait < 2){
+                                        bzero(buffer, sizeof(buffer));
+                                        sprintf(buffer, "Esperando jugadores\n");
+                                        send(i, buffer, sizeof(buffer), 0);
+                                    }
+                                    else{
+                                        if(nWait % 2 != 1){
+                                            bzero(buffer, sizeof(buffer));
+                                            sprintf(buffer, "Esperando jugadores\n");
+                                            send(i, buffer, sizeof(buffer), 0);  
+                                        }
+                                        else{
+                                            Player p2 = getFrontPlayer();
+                                            popWait();
+                                            pushbackActive(p1, p2);
+                                            //lanzar juego
+                                        }
+                                    }
+                                    
                                 }
 
                                 /*PASOS:
@@ -471,6 +494,15 @@ bool Server::isValidBySd(std::string user, int sd){
         }
     }
     return false;
+}
+std::string Server::getPassByUser(std::string user){
+    auto v = getLogins();
+    for(auto it = v.begin(); it != v.end(); it++){
+        if(user == std::get<0>(*it)){
+            return std::get<1>(*it);
+        }
+    }
+    return nullptr;
 }
 char * tratarString(char * buffer){
     char *pos = strchr(buffer, ' ');
