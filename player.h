@@ -23,6 +23,7 @@ class Player{
         std::string id_;
         std::string password_;
         std::vector<std::vector<char>> board_;
+        std::vector<std::vector<char>> contrary_board_;
         int sd_;
         bool waiting;
         int shots_;
@@ -47,6 +48,7 @@ class Player{
         void in_game();
 
         void print_board();
+        void print_contrary_board();
         bool set_board();
         bool set_to_up(int size, int x, int y);
         bool set_to_right(int size, int x, int y);

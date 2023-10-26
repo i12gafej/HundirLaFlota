@@ -13,8 +13,11 @@ Player::Player(std::string id, std::string password, int sd){
     waiting = true;
     shots_= 0 ;
 
-    std::vector<std::vector<char>> aux (10, std::vector<char>(10, 'A'));      //init the board
-    board_ = aux;
+    std::vector<std::vector<char>> aux_1 (10, std::vector<char>(10, 'A'));      //init the board
+    std::vector<std::vector<char>> aux_2 (10, std::vector<char>(10, 'X'));
+    board_ = aux_1;
+    contrary_board_ = aux_2;
+    
 }
 
 //May want to check the board in inverse order for printeability purposes
@@ -35,7 +38,25 @@ void Player::print_board(){
         printf("ERROR en el envío de la tabla\n%d: %s", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    
+}
+
+void Player::print_contrary_board(){
+    char board[200];
+    std::string string;
+    for(int i = 0; i < 10; i++){
+        for(int j = 0; j < 10; j++){
+            string.push_back(contrary_board_[i][j]);
+        }
+        string.push_back('\n');
+    }
+    string.push_back('\n');
+    strcpy(board, string.c_str());
+
+
+    if(send(this->get_socket(), board, sizeof(board), 0) < 0){
+        printf("ERROR en el envío de la tabla\n%d: %s", errno, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 }
 
 bool Player::set_board(){
