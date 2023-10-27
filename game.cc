@@ -17,6 +17,7 @@ Game::Game(Player player1, Player player2){
 /*TODO control the contrary board*/
 
 bool Game::start(){
+    srand(time(0));
     player1_.set_board();
     player1_.print_board();
     player2_.set_board();
@@ -30,58 +31,53 @@ bool Game::start(){
     int y;
     char** info;
 
-    do{                                 //must be prepared for requests depending on turns
+    do{
         commute_player_turn();
-        fd_set readfs;
-        FD_ZERO(&readfs);
 
         do{
+            printf(" \n");
             /**
-             * TODO: 
-             *  es tu turno
+             * TODO:
              *  que no se quede colgao
              * 
             */
             bzero(buff, sizeof(buff));
             if(turn_player1_)
             {
-                FD_SET(player1_.get_socket(), &readfs);
-                select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
-
-                if(FD_ISSET(player1_.get_socket(), &readfs))
-                {
-                    if(recv(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
-                        printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
-                        exit(EXIT_FAILURE);
-                    }
-                }else{
-                    printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
+                strcpy(buff, "+Ok. Es tu turno\n");
+                if(send(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
+                    printf("ERROR en el envío de turnos\n%d: %s\n", errno, strerror(errno));
+                    exit(EXIT_FAILURE);
+                }
+                bzero(buff, sizeof(buff));
+                
+                if(recv(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
+                    printf("ERROR en la escucha del jugador 1\n%d: %s\n", errno, strerror(errno));
+                    exit(EXIT_FAILURE);
                 }
             }
             else
             {
-                FD_SET(player2_.get_socket(), &readfs);
-                printf("Esperando en el select del jugador dos\n");
-                select(FD_SETSIZE,&readfs,NULL,NULL,NULL);
+                strcpy(buff, "+Ok. Es tu turno\n");
+                if(send(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
+                    printf("ERROR en el envío de turnos\n%d: %s\n", errno, strerror(errno));
+                    exit(EXIT_FAILURE);
+                }
+                bzero(buff, sizeof(buff));
 
-                if(FD_ISSET(player1_.get_socket(), &readfs))
-                {
-                    if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
-                        printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
-                        exit(EXIT_FAILURE);
-                    }
-                }else{
-                    printf("ERROR en la recogida de info\n%d: %s\n", errno, strerror(errno));
+                if(recv(player2_.get_socket(), buff, sizeof(buff), 0) < 0){
+                    printf("ERROR en la escucha del jugador 2\n%d: %s\n", errno, strerror(errno));
+                    exit(EXIT_FAILURE);
                 }
             }
 
             info = split(buff, ' ');
-            printf("info 1: %s, info 2: %s, info 3: %s\n", info[0], info[1], info[2]);
+            //printf("info 1: %s, info 2: %s, info 3: %s\n", info[0], info[1], info[2]);
             if(strcmp(info[0], "SALIR") == 0){
                 return !turn_player1_;
             }
 
-        }while(strcmp(info[0], "ATAQUE") != 0);
+        }while(strcmp(info[0], "DISPARO") != 0);
 
         if(turn_player1_)
         {
@@ -92,15 +88,18 @@ bool Game::start(){
             player2_.shoot();
         }
 
+        printf(" \n");
         game_response = attack(turn_player1_, info[1], info[2]);
         bzero(buff, sizeof(buff));
         strcpy(buff, game_response.c_str());
 
+        printf(" \n");
         if(turn_player1_){
             if(send(player1_.get_socket(), buff, sizeof(buff), 0) < 0){
                 printf("ERROR en el envío del jugador 1\n%d: %s\n", errno, strerror(errno));
                 exit(EXIT_FAILURE);
             }
+            player1_.print_contrary_board();
         }
         else
         {
@@ -108,12 +107,11 @@ bool Game::start(){
                 printf("ERROR en el envío del jugador 2\n%d: %s\n", errno, strerror(errno));
                 exit(EXIT_FAILURE);
             }
+            player2_.print_contrary_board();
         }
-
-        player1_.print_contrary_board();
-        player2_.print_contrary_board();
-
+        printf(" \n");
         this->set_has_ended(ckeck_game_ended(turn_player1_));
+        printf(" \n");
 
     }while(!this->has_ended());
 

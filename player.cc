@@ -31,9 +31,9 @@ void Player::print_board(){
         string.push_back('\n');
     }
     string.push_back('\n');
+
+    bzero(board, sizeof(board));
     strcpy(board, string.c_str());
-
-
     if(send(this->get_socket(), board, sizeof(board), 0) < 0){
         printf("ERROR en el envío de la tabla\n%d: %s", errno, strerror(errno));
         exit(EXIT_FAILURE);
@@ -50,9 +50,9 @@ void Player::print_contrary_board(){
         string.push_back('\n');
     }
     string.push_back('\n');
+
+    bzero(board, sizeof(board));
     strcpy(board, string.c_str());
-
-
     if(send(this->get_socket(), board, sizeof(board), 0) < 0){
         printf("ERROR en el envío de la tabla\n%d: %s", errno, strerror(errno));
         exit(EXIT_FAILURE);
@@ -63,10 +63,7 @@ char Player::get_position(int x, int y){
     return board_[x][y];
 }
 
-bool Player::set_board(){
-
-    srand(time(0));
-    
+bool Player::set_board(){    
     bool valid_position;
     int pos_x, pos_y, facing_way, boat_size;
 
