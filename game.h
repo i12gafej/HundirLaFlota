@@ -36,6 +36,7 @@ class Game{
         std::string attack(bool player_turn, char* x, char* y);     //returns message of state of the attack
         bool ckeck_game_ended(bool turn);
         void commute_player_turn();
+        bool right_coordinates(char* x, char* y);
 
 };
 

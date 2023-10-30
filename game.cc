@@ -77,7 +77,7 @@ bool Game::start(){
                 return !turn_player1_;
             }
 
-        }while(strcmp(info[0], "DISPARO") != 0);
+        }while(strcmp(info[0], "DISPARO") != 0 && !right_coordinates(info[1], info[2]));
 
         if(turn_player1_)
         {
@@ -234,7 +234,7 @@ int Game::coordinate_conversion_engine(char* s){
         case 'J':
         return 9;
         default:
-        return 0;
+        return -1;
     }
 }
 
@@ -261,5 +261,15 @@ void Game::commute_player_turn(){
         set_turn_player1(false);
     }else{
         set_turn_player1(true);
+    }
+}
+
+bool Game::right_coordinates(char* x, char* y){
+    int x_aux = coordinate_conversion_engine(x);
+    int y_aux = atoi(y);
+    if(x_aux > 9 || x_aux < 0 || y_aux > 9 || y_aux < 0){
+        return false;
+    }else{
+        return true;
     }
 }
